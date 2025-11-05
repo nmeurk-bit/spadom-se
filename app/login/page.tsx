@@ -1,11 +1,10 @@
 // app/login/page.tsx
 'use client';
 
-import { useState } from 'next/form';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/firebase';
 import { sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink } from 'firebase/auth';
-import { useEffect } from 'react';
 import ErrorBanner from '@/components/ErrorBanner';
 
 export default function LoginPage() {
