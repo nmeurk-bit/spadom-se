@@ -1,7 +1,7 @@
 // app/login/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { getFirebaseAuth } from '@/lib/firebase';
 import { sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink } from 'firebase/auth';
@@ -14,16 +14,13 @@ export default function LoginPage() {
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    // Kontrollera om detta är en återkommande från magilänk
-    if (isSignInWithEmailLink(getFirebaseAuth(), window.location.href)) {
-      handleSignInWithLink();
-    }
-  }, []);
+  const handleSignInWithLink = useCallback(async () => {
+    console.log('handleSignInWithLink called');
+    console.log('Current URL:', window.location.href);
 
-  const handleSignInWithLink = async () => {
     let emailForSignIn = localStorage.getItem('emailForSignIn');
-    
+    console.log('Email from localStorage:', emailForSignIn);
+
     if (!emailForSignIn) {
       emailForSignIn = window.prompt('Vänligen ange din e-postadress för bekräftelse');
     }
@@ -34,14 +31,40 @@ export default function LoginPage() {
     }
 
     try {
+      console.log('Attempting to sign in with email link...');
       await signInWithEmailLink(getFirebaseAuth(), emailForSignIn, window.location.href);
       localStorage.removeItem('emailForSignIn');
+      console.log('Sign in successful, redirecting to /konto');
       router.push('/konto');
     } catch (err: any) {
-      setError('Kunde inte logga in. Länken kan ha gått ut. Försök igen.');
       console.error('Sign in error:', err);
+      console.error('Error code:', err.code);
+      console.error('Error message:', err.message);
+
+      let errorMessage = 'Kunde inte logga in. Länken kan ha gått ut. Försök igen.';
+
+      if (err.code === 'auth/invalid-action-code') {
+        errorMessage = 'Inloggningslänken har gått ut eller redan använts. Begär en ny länk.';
+      } else if (err.code === 'auth/invalid-email') {
+        errorMessage = 'Ogiltig e-postadress. Kontrollera att du angett rätt adress.';
+      } else if (err.code === 'auth/expired-action-code') {
+        errorMessage = 'Länken har gått ut. Länken är giltig i 60 minuter. Begär en ny länk.';
+      }
+
+      setError(errorMessage);
     }
-  };
+  }, [router]);
+
+  useEffect(() => {
+    // Kontrollera om detta är en återkommande från magilänk
+    console.log('Checking if current URL is a sign-in link...');
+    if (isSignInWithEmailLink(getFirebaseAuth(), window.location.href)) {
+      console.log('URL is a sign-in link, processing...');
+      handleSignInWithLink();
+    } else {
+      console.log('URL is not a sign-in link');
+    }
+  }, [handleSignInWithLink]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,13 +78,21 @@ export default function LoginPage() {
     }
 
     try {
+      // Ensure we have a valid return URL
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || window.location.origin;
+      const returnUrl = `${baseUrl}/login`;
+
+      console.log('Attempting to send sign-in link to:', email);
+      console.log('Return URL:', returnUrl);
+
       const actionCodeSettings = {
-        url: `${process.env.NEXT_PUBLIC_BASE_URL || window.location.origin}/login`,
+        url: returnUrl,
         handleCodeInApp: true,
       };
 
       await sendSignInLinkToEmail(getFirebaseAuth(), email, actionCodeSettings);
       localStorage.setItem('emailForSignIn', email);
+      console.log('Sign-in link sent successfully');
       setSent(true);
     } catch (err: any) {
       console.error('Send link error:', err);
