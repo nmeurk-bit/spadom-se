@@ -62,10 +62,13 @@ service cloud.firestore {
       // Användare kan skapa readings (via atomisk transaktion i kod)
       allow create: if isSignedIn()
                     && request.resource.data.userId == request.auth.uid
-                    && request.resource.data.keys().hasAll(['userId', 'question', 'category', 'status', 'createdAt'])
+                    && request.resource.data.keys().hasAll(['userId', 'targetName', 'question', 'category', 'status', 'createdAt'])
+                    && request.resource.data.targetName is string
+                    && request.resource.data.targetName.size() > 0
                     && request.resource.data.question is string
                     && request.resource.data.question.size() >= 10
-                    && request.resource.data.category in ['love', 'career', 'finance', 'general']
+                    && request.resource.data.question.size() <= 500
+                    && request.resource.data.category in ['love', 'economy', 'self_development', 'spirituality', 'future', 'other']
                     && request.resource.data.status == 'received'
                     && request.resource.data.createdAt is timestamp;
 

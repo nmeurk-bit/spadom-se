@@ -1,4 +1,4 @@
-// app/api/bestallning/route.ts (Vercel-kompatibel version)
+// app/api/bestallning/route.ts (Legacy endpoint - använd /api/readings istället)
 import { NextRequest, NextResponse } from 'next/server';
 import { createReadingAtomic } from '@/lib/firestore';
 
@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
     // Hämta userId från request body istället för att verifiera token server-side
     // Frontend ska skicka userId efter att ha verifierat användaren där
     const body = await request.json();
-    const { userId, question, category, birthdate } = body;
+    const { userId, question, category, targetName } = body;
 
     // Validera userId
     if (!userId) {
@@ -25,7 +25,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!['love', 'career', 'finance', 'general'].includes(category)) {
+    if (!targetName || typeof targetName !== 'string' || targetName.trim().length === 0) {
+      return NextResponse.json(
+        { error: 'Du måste ange vem spådomen gäller.' },
+        { status: 400 }
+      );
+    }
+
+    if (!['love', 'economy', 'self_development', 'spirituality', 'future', 'other'].includes(category)) {
       return NextResponse.json(
         { error: 'Ogiltig kategori.' },
         { status: 400 }
@@ -34,9 +41,9 @@ export async function POST(request: NextRequest) {
 
     // Skapa reading atomiskt (kontrollerar saldo och drar 1 kredit)
     const result = await createReadingAtomic(userId, {
+      targetName: targetName.trim(),
       question: question.trim(),
       category,
-      birthdate: birthdate || undefined,
     });
 
     if (!result.success) {

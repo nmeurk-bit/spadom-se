@@ -40,9 +40,10 @@ export interface Order {
 
 export interface Reading {
   userId: string;
+  targetName: string; // Vem spådomen gäller
+  category: 'love' | 'economy' | 'self_development' | 'spirituality' | 'future' | 'other';
   question: string;
-  category: 'love' | 'career' | 'finance' | 'general';
-  birthdate?: string;
+  answer?: string; // AI-genererat svar (läggs till när spådomen bearbetas)
   status: 'received' | 'processing' | 'completed';
   createdAt: Timestamp;
 }

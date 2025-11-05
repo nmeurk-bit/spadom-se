@@ -103,11 +103,33 @@ export default function KontoPage() {
   const getCategoryLabel = (category: string) => {
     const labels: Record<string, string> = {
       love: 'Kärlek',
+      economy: 'Ekonomi',
+      self_development: 'Självutveckling',
+      spirituality: 'Andlighet',
+      future: 'Framtiden',
+      other: 'Övrigt',
+      // Legacy categories
       career: 'Karriär',
       finance: 'Ekonomi',
       general: 'Allmänt',
     };
     return labels[category] || category;
+  };
+
+  const getCategoryEmoji = (category: string) => {
+    const emojis: Record<string, string> = {
+      love: '❤️',
+      economy: '💰',
+      self_development: '🌈',
+      spirituality: '🌙',
+      future: '🕰️',
+      other: '✨',
+      // Legacy categories
+      career: '💼',
+      finance: '💰',
+      general: '✨',
+    };
+    return emojis[category] || '✨';
   };
 
   const getStatusLabel = (status: string) => {
@@ -151,14 +173,14 @@ export default function KontoPage() {
         </div>
       </div>
 
-      {/* Beställ ny spådom knapp */}
+      {/* Använd en spådom knapp */}
       <div className="mb-8">
         {balance > 0 ? (
           <button
-            onClick={() => router.push('/bestallning')}
-            className="w-full sm:w-auto bg-mystical-gold text-gray-900 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-opacity-90 transition-all shadow-md hover:shadow-lg"
+            onClick={() => router.push('/lasning/ny')}
+            className="w-full sm:w-auto bg-mystical-purple text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-opacity-90 transition-all shadow-md hover:shadow-lg"
           >
-            Beställ ny spådom
+            🔮 Använd en spådom
           </button>
         ) : (
           <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-6">
@@ -197,65 +219,107 @@ export default function KontoPage() {
         </div>
       </section>
 
-      {/* Senaste beställningarna */}
+      {/* Mina spådomar */}
       <section className="mb-12">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-          Senaste beställningarna
+          🔮 Mina spådomar
         </h2>
         {readings.length === 0 ? (
-          <p className="text-gray-600 dark:text-gray-400">
-            Du har inga beställningar ännu.
-          </p>
+          <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-8 text-center">
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              Du har inga spådomar ännu.
+            </p>
+            <button
+              onClick={() => router.push('/lasning/ny')}
+              className="px-6 py-3 bg-mystical-purple text-white rounded-lg font-semibold hover:bg-opacity-90 transition-all"
+            >
+              Skapa din första spådom
+            </button>
+          </div>
         ) : (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
-            <table className="w-full">
-              <thead className="bg-gray-50 dark:bg-gray-700">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Datum
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Kategori
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Fråga
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Status
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                {readings.map((reading) => (
-                  <tr key={reading.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      {formatDate(reading.createdAt)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      {getCategoryLabel(reading.category)}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">
-                      {reading.question.length > 50
-                        ? reading.question.substring(0, 50) + '...'
-                        : reading.question}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          reading.status === 'completed'
-                            ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
-                            : reading.status === 'processing'
-                            ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
-                            : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
-                        }`}
-                      >
-                        {getStatusLabel(reading.status)}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {readings.map((reading) => (
+              <div
+                key={reading.id}
+                className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
+              >
+                {/* Header med datum och kategori */}
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center">
+                    <span className="text-2xl mr-2">
+                      {getCategoryEmoji(reading.category)}
+                    </span>
+                    <div>
+                      <h3 className="font-semibold text-gray-900 dark:text-white">
+                        {getCategoryLabel(reading.category)}
+                      </h3>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {formatDate(reading.createdAt)}
+                      </p>
+                    </div>
+                  </div>
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      reading.status === 'completed'
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+                        : reading.status === 'processing'
+                        ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
+                        : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                    }`}
+                  >
+                    {getStatusLabel(reading.status)}
+                  </span>
+                </div>
+
+                {/* Vem spådomen gäller (om fältet finns) */}
+                {reading.targetName && (
+                  <div className="mb-3">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                      För:
+                    </p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">
+                      {reading.targetName}
+                    </p>
+                  </div>
+                )}
+
+                {/* Frågan */}
+                <div className="mb-4">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                    Fråga:
+                  </p>
+                  <p className="text-sm text-gray-900 dark:text-white italic">
+                    "{reading.question.length > 100
+                      ? reading.question.substring(0, 100) + '...'
+                      : reading.question}"
+                  </p>
+                </div>
+
+                {/* Spådomens svar (om det finns) */}
+                {reading.answer && (
+                  <div className="mb-4 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                    <p className="text-sm text-gray-700 dark:text-gray-300">
+                      {reading.answer.length > 150
+                        ? reading.answer.substring(0, 150) + '...'
+                        : reading.answer}
+                    </p>
+                  </div>
+                )}
+
+                {/* Läs mer-knapp (placeholder för framtida funktionalitet) */}
+                {reading.answer && (
+                  <button
+                    onClick={() => {
+                      // TODO: Implementera modal eller separat sida för att visa hela spådomen
+                      alert('Visa hela spådomen: ' + reading.id);
+                    }}
+                    className="text-sm text-mystical-purple hover:underline font-semibold"
+                  >
+                    Läs hela spådomen →
+                  </button>
+                )}
+              </div>
+            ))}
           </div>
         )}
       </section>
