@@ -20,87 +20,138 @@ export interface AdminWallet {
 
 // Get or create wallet for user
 export async function getOrCreateWallet(userId: string): Promise<AdminWallet> {
-  const db = getAdminFirestore();
-  const walletRef = db.collection('wallets').doc(userId);
-  const walletDoc = await walletRef.get();
+  try {
+    console.log('📂 Getting/creating wallet for user:', userId);
+    const db = getAdminFirestore();
+    const walletRef = db.collection('wallets').doc(userId);
+    const walletDoc = await walletRef.get();
 
-  if (walletDoc.exists) {
-    return walletDoc.data() as AdminWallet;
+    if (walletDoc.exists) {
+      console.log('✅ Wallet found for user:', userId);
+      return walletDoc.data() as AdminWallet;
+    }
+
+    // Create new wallet with 0 balance
+    console.log('📝 Creating new wallet for user:', userId);
+    const newWallet: AdminWallet = {
+      balance: 0,
+      updatedAt: FieldValue.serverTimestamp() as any,
+    };
+
+    await walletRef.set(newWallet);
+    console.log('✅ Wallet created for user:', userId);
+    return newWallet;
+  } catch (error: any) {
+    console.error('❌ Error in getOrCreateWallet:', error);
+    console.error('Error code:', error.code);
+    console.error('Error details:', error.details);
+    throw new Error(`Failed to get/create wallet: ${error.message}`);
   }
-
-  // Create new wallet with 0 balance
-  const newWallet: AdminWallet = {
-    balance: 0,
-    updatedAt: FieldValue.serverTimestamp() as any,
-  };
-
-  await walletRef.set(newWallet);
-  return newWallet;
 }
 
 // Update wallet balance (admin only)
 export async function adminIncWallet(userId: string, amount: number): Promise<void> {
-  const db = getAdminFirestore();
-  const walletRef = db.collection('wallets').doc(userId);
+  try {
+    console.log(`💰 Incrementing wallet for user ${userId} by ${amount}`);
+    const db = getAdminFirestore();
+    const walletRef = db.collection('wallets').doc(userId);
 
-  await walletRef.set(
-    {
-      balance: FieldValue.increment(amount),
-      updatedAt: FieldValue.serverTimestamp(),
-    },
-    { merge: true }
-  );
+    await walletRef.set(
+      {
+        balance: FieldValue.increment(amount),
+        updatedAt: FieldValue.serverTimestamp(),
+      },
+      { merge: true }
+    );
+    console.log('✅ Wallet incremented successfully');
+  } catch (error: any) {
+    console.error('❌ Error in adminIncWallet:', error);
+    console.error('Error code:', error.code);
+    console.error('Error details:', error.details);
+    throw new Error(`Failed to increment wallet: ${error.message}`);
+  }
 }
 
 // Create order (admin only)
 export async function adminCreateOrder(orderData: Omit<AdminOrder, 'createdAt'>): Promise<string> {
-  const db = getAdminFirestore();
-  const orderRef = db.collection('orders').doc();
+  try {
+    console.log('📝 Creating order:', JSON.stringify(orderData));
+    const db = getAdminFirestore();
+    const orderRef = db.collection('orders').doc();
 
-  await orderRef.set({
-    ...orderData,
-    createdAt: FieldValue.serverTimestamp(),
-  });
+    await orderRef.set({
+      ...orderData,
+      createdAt: FieldValue.serverTimestamp(),
+    });
 
-  return orderRef.id;
+    console.log('✅ Order created with ID:', orderRef.id);
+    return orderRef.id;
+  } catch (error: any) {
+    console.error('❌ Error in adminCreateOrder:', error);
+    console.error('Error code:', error.code);
+    console.error('Error details:', error.details);
+    throw new Error(`Failed to create order: ${error.message}`);
+  }
 }
 
 // Get user by email
 export async function adminGetUserByEmail(email: string): Promise<{ id: string; email: string } | null> {
-  const db = getAdminFirestore();
-  const usersRef = db.collection('users');
-  const snapshot = await usersRef.where('email', '==', email).limit(1).get();
+  try {
+    console.log('🔍 Looking up user by email:', email);
+    const db = getAdminFirestore();
+    const usersRef = db.collection('users');
+    const snapshot = await usersRef.where('email', '==', email).limit(1).get();
 
-  if (snapshot.empty) {
-    return null;
+    if (snapshot.empty) {
+      console.log('ℹ️  No user found with email:', email);
+      return null;
+    }
+
+    const userDoc = snapshot.docs[0];
+    console.log('✅ User found with ID:', userDoc.id);
+    return {
+      id: userDoc.id,
+      email: userDoc.data().email,
+    };
+  } catch (error: any) {
+    console.error('❌ Error in adminGetUserByEmail:', error);
+    console.error('Error code:', error.code);
+    console.error('Error details:', error.details);
+    throw new Error(`Failed to get user by email: ${error.message}`);
   }
-
-  const userDoc = snapshot.docs[0];
-  return {
-    id: userDoc.id,
-    email: userDoc.data().email,
-  };
 }
 
 // Ensure user exists by email (create if not exists)
 export async function adminEnsureUserByEmail(email: string): Promise<string> {
-  const existingUser = await adminGetUserByEmail(email);
+  try {
+    console.log('👤 Ensuring user exists for email:', email);
+    const existingUser = await adminGetUserByEmail(email);
 
-  if (existingUser) {
-    return existingUser.id;
+    if (existingUser) {
+      console.log('✅ User already exists:', existingUser.id);
+      return existingUser.id;
+    }
+
+    // Create new user
+    console.log('📝 Creating new user for email:', email);
+    const db = getAdminFirestore();
+    const userRef = db.collection('users').doc();
+
+    await userRef.set({
+      email,
+      createdAt: FieldValue.serverTimestamp(),
+    });
+
+    console.log('✅ User created with ID:', userRef.id);
+
+    // Create wallet for new user
+    await getOrCreateWallet(userRef.id);
+
+    return userRef.id;
+  } catch (error: any) {
+    console.error('❌ Error in adminEnsureUserByEmail:', error);
+    console.error('Error code:', error.code);
+    console.error('Error details:', error.details);
+    throw new Error(`Failed to ensure user exists: ${error.message}`);
   }
-
-  // Create new user
-  const db = getAdminFirestore();
-  const userRef = db.collection('users').doc();
-
-  await userRef.set({
-    email,
-    createdAt: FieldValue.serverTimestamp(),
-  });
-
-  // Create wallet for new user
-  await getOrCreateWallet(userRef.id);
-
-  return userRef.id;
 }
