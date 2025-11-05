@@ -18,6 +18,39 @@ export interface AdminWallet {
   updatedAt: FirebaseFirestore.Timestamp;
 }
 
+export interface AdminReading {
+  userId: string;
+  targetName: string;
+  category: 'love' | 'economy' | 'self_development' | 'spirituality' | 'future' | 'other';
+  question: string;
+  answer?: string;
+  status: 'received' | 'processing' | 'completed';
+  createdAt: FirebaseFirestore.Timestamp;
+}
+
+// Get wallet for user (admin only)
+export async function adminGetWallet(userId: string): Promise<AdminWallet | null> {
+  try {
+    console.log('📂 Getting wallet for user:', userId);
+    const db = getAdminFirestore();
+    const walletRef = db.collection('wallets').doc(userId);
+    const walletDoc = await walletRef.get();
+
+    if (!walletDoc.exists) {
+      console.log('ℹ️  Wallet not found for user:', userId);
+      return null;
+    }
+
+    console.log('✅ Wallet found for user:', userId);
+    return walletDoc.data() as AdminWallet;
+  } catch (error: any) {
+    console.error('❌ Error in adminGetWallet:', error);
+    console.error('Error code:', error.code);
+    console.error('Error details:', error.details);
+    throw new Error(`Failed to get wallet: ${error.message}`);
+  }
+}
+
 // Get or create wallet for user
 export async function getOrCreateWallet(userId: string): Promise<AdminWallet> {
   try {
@@ -155,3 +188,74 @@ export async function adminEnsureUserByEmail(email: string): Promise<string> {
     throw new Error(`Failed to ensure user exists: ${error.message}`);
   }
 }
+
+// Create reading with atomic wallet decrement (admin only)
+export async function adminCreateReadingAtomic(
+  userId: string,
+  readingData: Omit<AdminReading, 'userId' | 'status' | 'createdAt'>
+): Promise<{ success: boolean; readingId?: string; error?: string }> {
+  try {
+    console.log('📖 Creating reading atomically for user:', userId);
+    console.log('📝 Reading data:', readingData);
+
+    const db = getAdminFirestore();
+
+    // Run transaction
+    const result = await db.runTransaction(async (transaction) => {
+      const walletRef = db.collection('wallets').doc(userId);
+      const walletDoc = await transaction.get(walletRef);
+
+      if (!walletDoc.exists) {
+        console.log('❌ Wallet not found for user:', userId);
+        throw new Error('Wallet not found');
+      }
+
+      const wallet = walletDoc.data() as AdminWallet;
+      console.log('💰 Current balance:', wallet.balance);
+
+      if (wallet.balance < 1) {
+        console.log('❌ Insufficient balance');
+        throw new Error('Insufficient balance');
+      }
+
+      // Create reading
+      const readingRef = db.collection('readings').doc();
+      const newReading: AdminReading = {
+        userId,
+        ...readingData,
+        status: 'received',
+        createdAt: FieldValue.serverTimestamp() as any,
+      };
+
+      transaction.set(readingRef, newReading);
+      console.log('✅ Reading document created with ID:', readingRef.id);
+
+      // Decrement wallet balance
+      transaction.update(walletRef, {
+        balance: FieldValue.increment(-1),
+        updatedAt: FieldValue.serverTimestamp(),
+      });
+      console.log('✅ Wallet balance decremented');
+
+      return readingRef.id;
+    });
+
+    console.log('🎉 Transaction completed successfully');
+    return { success: true, readingId: result };
+  } catch (error: any) {
+    console.error('❌ Error in adminCreateReadingAtomic:', error);
+
+    if (error.message === 'Insufficient balance') {
+      return { success: false, error: 'insufficient_balance' };
+    }
+
+    if (error.message === 'Wallet not found') {
+      return { success: false, error: 'wallet_not_found' };
+    }
+
+    console.error('Error code:', error.code);
+    console.error('Error details:', error.details);
+    return { success: false, error: 'unknown_error' };
+  }
+}
+

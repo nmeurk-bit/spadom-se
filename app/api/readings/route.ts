@@ -1,8 +1,7 @@
 // app/api/readings/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { generateProphecy, type Category } from '@/lib/ai';
-import { getFirebaseAuth } from '@/lib/firebase';
-import { createReadingAtomic, getWallet } from '@/lib/firestore';
+import { adminGetWallet, adminCreateReadingAtomic } from '@/lib/firestore-admin';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -60,7 +59,7 @@ export async function POST(request: NextRequest) {
 
     // Kolla saldo (innan vi genererar AI-svar för att spara resurser)
     console.log('💰 Checking wallet balance...');
-    const wallet = await getWallet(userId);
+    const wallet = await adminGetWallet(userId);
 
     if (!wallet) {
       return NextResponse.json(
@@ -101,7 +100,7 @@ export async function POST(request: NextRequest) {
 
     // Spara i Firestore med atomisk transaktion (skapar reading + drar -1 från wallet)
     console.log('💾 Saving reading to Firestore...');
-    const result = await createReadingAtomic(userId, {
+    const result = await adminCreateReadingAtomic(userId, {
       targetName,
       category,
       question,
