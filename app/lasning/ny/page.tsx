@@ -110,7 +110,10 @@ export default function NyLasningPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Något gick fel');
+        console.error('❌ API Error:', data);
+        const errorMsg = data.message || data.error || 'Något gick fel';
+        const details = data.details ? `\n\nDetaljer: ${data.details}` : '';
+        throw new Error(errorMsg + details);
       }
 
       // Uppdatera saldo
