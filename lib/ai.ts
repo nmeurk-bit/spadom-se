@@ -102,37 +102,63 @@ Fråga: "${request.question}"
 
 Ge ett varmt, insiktsfullt budskap på svenska. Använd tarotsymbolik och avsluta med ett råd.`;
 
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: 'gpt-4',
-      messages: [
-        {
-          role: 'system',
-          content: systemPrompt,
-        },
-        {
-          role: 'user',
-          content: userPrompt,
-        },
-      ],
-      max_tokens: 1024,
-      temperature: 0.8,
-    }),
-  });
+  // Försök med gpt-4o först, sedan fallback till gpt-3.5-turbo
+  const models = ['gpt-4o', 'gpt-3.5-turbo'];
 
-  if (!response.ok) {
-    const error = await response.text();
-    console.error('OpenAI API error:', error);
-    throw new Error(`OpenAI API error: ${response.status}`);
+  for (const model of models) {
+    try {
+      console.log(`🤖 Trying OpenAI model: ${model}`);
+
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            {
+              role: 'system',
+              content: systemPrompt,
+            },
+            {
+              role: 'user',
+              content: userPrompt,
+            },
+          ],
+          max_tokens: 1024,
+          temperature: 0.8,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        console.error(`OpenAI API error for ${model}:`, error);
+
+        // Om det inte är sista modellen, försök nästa
+        if (model !== models[models.length - 1]) {
+          console.log(`⚠️ Model ${model} failed, trying next model...`);
+          continue;
+        }
+
+        throw new Error(`OpenAI API error: ${response.status} - ${error}`);
+      }
+
+      const data = await response.json();
+      console.log(`✅ Successfully used OpenAI model: ${model}`);
+      return data.choices[0].message.content;
+    } catch (error) {
+      // Om det inte är sista modellen, försök nästa
+      if (model !== models[models.length - 1]) {
+        console.log(`⚠️ Model ${model} failed, trying next model...`);
+        continue;
+      }
+      throw error;
+    }
   }
 
-  const data = await response.json();
-  return data.choices[0].message.content;
+  throw new Error('All OpenAI models failed');
 }
 
 // Huvudfunktion: Generera spådom (väljer automatiskt vilken AI som finns tillgänglig)
