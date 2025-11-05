@@ -1,0 +1,49 @@
+rules_version = '2';
+
+// TEMPORARY DEBUG RULES - DO NOT USE IN PRODUCTION!
+// This allows us to see what's happening
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Users collection - OPEN FOR DEBUGGING
+    match /users/{userId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // Wallets collection - OPEN FOR DEBUGGING
+    match /wallets/{userId} {
+      allow read: if isSignedIn();
+      allow write: if false; // Still block writes from client
+    }
+
+    // Orders collection - OPEN FOR DEBUGGING
+    match /orders/{orderId} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
+    // Readings collection - OPEN FOR DEBUGGING
+    match /readings/{readingId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn()
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.keys().hasAll(['userId', 'question', 'category', 'status', 'createdAt'])
+                    && request.resource.data.question is string
+                    && request.resource.data.question.size() >= 10
+                    && request.resource.data.category in ['love', 'career', 'finance', 'general']
+                    && request.resource.data.status == 'received'
+                    && request.resource.data.createdAt is timestamp;
+      allow update: if false;
+      allow delete: if false;
+    }
+  }
+}
