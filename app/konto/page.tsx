@@ -29,21 +29,34 @@ export default function KontoPage() {
       // Spara userId i state
       setUserId(user.uid);
 
+      console.log('🔐 User logged in with ID:', user.uid);
+      console.log('📧 User email:', user.email);
+
       try {
         // Hämta wallet
+        console.log('💰 Fetching wallet for user:', user.uid);
         const wallet = await getWallet(user.uid);
+        console.log('💰 Wallet data:', wallet);
+        console.log('💰 Balance:', wallet?.balance);
         setBalance(wallet?.balance || 0);
 
         // Hämta orders
+        console.log('📦 Fetching orders for user:', user.uid);
         const userOrders = await listOrdersForUser(user.uid);
+        console.log('📦 Orders found:', userOrders.length);
         setOrders(userOrders);
 
         // Hämta readings
+        console.log('📖 Fetching readings for user:', user.uid);
         const userReadings = await listReadingsForUser(user.uid);
+        console.log('📖 Readings found:', userReadings.length);
         setReadings(userReadings);
+
+        console.log('✅ All data loaded successfully');
       } catch (err: any) {
         setError('Kunde inte ladda kontoinformation');
-        console.error('Load error:', err);
+        console.error('❌ Load error:', err);
+        console.error('❌ Error details:', err.message);
       } finally {
         setLoading(false);
       }
