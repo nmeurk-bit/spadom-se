@@ -64,8 +64,32 @@ export default function LoginPage() {
       localStorage.setItem('emailForSignIn', email);
       setSent(true);
     } catch (err: any) {
-      setError('Kunde inte skicka inloggningslänk. Försök igen.');
       console.error('Send link error:', err);
+      console.error('Error code:', err.code);
+      console.error('Error message:', err.message);
+
+      // Provide more specific error messages based on Firebase error codes
+      let errorMessage = 'Kunde inte skicka inloggningslänk. Försök igen.';
+
+      if (err.code === 'auth/invalid-email') {
+        errorMessage = 'Ogiltig e-postadress. Kontrollera att du angett rätt adress.';
+      } else if (err.code === 'auth/invalid-api-key' || err.code === 'auth/invalid-app-credential') {
+        errorMessage = 'Konfigurationsfel: Firebase är inte korrekt konfigurerat. Kontakta support.';
+        console.error('Firebase configuration error - check environment variables');
+      } else if (err.code === 'auth/unauthorized-domain' || err.code === 'auth/unauthorized-continue-uri') {
+        errorMessage = 'Domänen är inte auktoriserad för e-postinloggning. Kontakta support.';
+        console.error('Domain not authorized in Firebase Console');
+      } else if (err.code === 'auth/operation-not-allowed') {
+        errorMessage = 'E-postinloggning är inte aktiverat. Kontakta support.';
+        console.error('Email link sign-in is not enabled in Firebase Console');
+      } else if (err.code === 'auth/network-request-failed') {
+        errorMessage = 'Nätverksfel. Kontrollera din internetanslutning och försök igen.';
+      } else if (err.message) {
+        // For development: show the actual error message
+        console.error('Detailed error:', err.message);
+      }
+
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

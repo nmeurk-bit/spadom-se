@@ -12,6 +12,19 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || 'mock-app-id',
 };
 
+// Check if Firebase is properly configured
+function isFirebaseConfigured(): boolean {
+  return firebaseConfig.apiKey !== 'mock-api-key' &&
+         firebaseConfig.authDomain !== 'mock-auth-domain' &&
+         firebaseConfig.projectId !== 'mock-project-id';
+}
+
+// Warn in development if Firebase is not configured
+if (typeof window !== 'undefined' && !isFirebaseConfigured()) {
+  console.warn('⚠️ Firebase is not properly configured. Please set up environment variables.');
+  console.warn('See .env.example for required configuration.');
+}
+
 // Lazy initialization helpers
 let app: FirebaseApp | null = null;
 let auth: Auth | null = null;
