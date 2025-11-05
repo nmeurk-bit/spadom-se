@@ -12,6 +12,7 @@ import ErrorBanner from '@/components/ErrorBanner';
 export default function KontoPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState<string | null>(null);
   const [balance, setBalance] = useState(0);
   const [orders, setOrders] = useState<Array<Order & { id: string }>>([]);
   const [readings, setReadings] = useState<Array<Reading & { id: string }>>([]);
@@ -24,6 +25,9 @@ export default function KontoPage() {
         router.push('/login');
         return;
       }
+
+      // Spara userId i state
+      setUserId(user.uid);
 
       try {
         // Hämta wallet
@@ -58,7 +62,7 @@ export default function KontoPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ quantity }),
+        body: JSON.stringify({ quantity, userId }),
       });
 
       const data = await response.json();
