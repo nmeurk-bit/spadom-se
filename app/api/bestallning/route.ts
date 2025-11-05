@@ -1,8 +1,16 @@
 // app/api/bestallning/route.ts (Vercel-kompatibel version)
 import { NextRequest, NextResponse } from 'next/server';
 import { createReadingAtomic } from '@/lib/firestore';
+import { isFirebaseConfigured } from '@/lib/firebase';
+
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
+  // Soft-off: Om Firebase inte är konfigurerat, returnera OK
+  if (!isFirebaseConfigured()) {
+    return NextResponse.json({ ok: true, disabled: 'firebase' }, { status: 200 });
+  }
+
   try {
     // Hämta userId från request body istället för att verifiera token server-side
     // Frontend ska skicka userId efter att ha verifierat användaren där

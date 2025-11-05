@@ -1,7 +1,7 @@
 // app/api/webhook/route.ts - Stripe webhook för Vercel (soft-off)
 import { NextRequest, NextResponse } from 'next/server';
 import { ensureUserByEmail } from '@/lib/firestore';
-import { firestore } from '@/lib/firebase';
+import { firestore, isFirebaseConfigured } from '@/lib/firebase';
 import { doc, runTransaction, Timestamp, collection, setDoc } from 'firebase/firestore';
 
 export const runtime = 'nodejs';
@@ -9,9 +9,9 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
-    // Soft-off: Om Stripe-nycklar saknas, returnera OK utan att köra Stripe-kod
-    if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET) {
-      return NextResponse.json({ ok: true, disabled: 'stripe' }, { status: 200 });
+    // Soft-off: Om Stripe eller Firebase saknas, returnera OK
+    if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET || !isFirebaseConfigured()) {
+      return NextResponse.json({ ok: true, disabled: 'stripe or firebase' }, { status: 200 });
     }
 
     // Lazy import av Stripe (endast om nycklar finns)

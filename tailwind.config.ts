@@ -12,6 +12,18 @@ const config: Config = {
         'mystical-purple': '#6B46C1',
         'mystical-gold': '#D4AF37',
       },
+      fontFamily: {
+        sans: [
+          'system-ui',
+          '-apple-system',
+          'BlinkMacSystemFont',
+          '"Segoe UI"',
+          'Roboto',
+          '"Helvetica Neue"',
+          'Arial',
+          'sans-serif',
+        ],
+      },
     },
   },
   plugins: [],
