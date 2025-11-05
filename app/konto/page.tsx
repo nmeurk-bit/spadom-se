@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { auth } from '@/lib/firebase';
+import { getFirebaseAuth } from '@/lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { getWallet, listOrdersForUser, listReadingsForUser } from '@/lib/firestore';
 import type { Order, Reading } from '@/lib/firestore';
@@ -19,7 +19,7 @@ export default function KontoPage() {
   const [purchaseLoading, setPurchaseLoading] = useState<number | null>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    const unsubscribe = onAuthStateChanged(getFirebaseAuth(), async (user) => {
       if (!user) {
         router.push('/login');
         return;

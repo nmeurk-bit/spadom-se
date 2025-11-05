@@ -1,12 +1,17 @@
 // app/layout.tsx
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+// Temporarily using system fonts to avoid Google Fonts network dependency during build
+// import { Inter } from 'next/font/google';
 import '@/styles/globals.css';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import CookieBanner from '@/components/CookieBanner';
 
-const inter = Inter({ subsets: ['latin'] });
+// const inter = Inter({
+//   subsets: ['latin'],
+//   display: 'swap',
+//   fallback: ['system-ui', 'arial'],
+// });
 
 export const metadata: Metadata = {
   title: 'Spådom.se - AI-driven andlig vägledning',
@@ -37,7 +42,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="sv">
-      <body className={inter.className}>
+      <body className="font-sans">
         <div className="flex flex-col min-h-screen">
           <Header />
           <main className="flex-grow">

@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { auth } from '@/lib/firebase';
+import { getFirebaseAuth } from '@/lib/firebase';
 import { sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink } from 'firebase/auth';
 import ErrorBanner from '@/components/ErrorBanner';
 
@@ -16,7 +16,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     // Kontrollera om detta är en återkommande från magilänk
-    if (isSignInWithEmailLink(auth, window.location.href)) {
+    if (isSignInWithEmailLink(getFirebaseAuth(), window.location.href)) {
       handleSignInWithLink();
     }
   }, []);
@@ -34,7 +34,7 @@ export default function LoginPage() {
     }
 
     try {
-      await signInWithEmailLink(auth, emailForSignIn, window.location.href);
+      await signInWithEmailLink(getFirebaseAuth(), emailForSignIn, window.location.href);
       localStorage.removeItem('emailForSignIn');
       router.push('/konto');
     } catch (err: any) {
@@ -60,7 +60,7 @@ export default function LoginPage() {
         handleCodeInApp: true,
       };
 
-      await sendSignInLinkToEmail(auth, email, actionCodeSettings);
+      await sendSignInLinkToEmail(getFirebaseAuth(), email, actionCodeSettings);
       localStorage.setItem('emailForSignIn', email);
       setSent(true);
     } catch (err: any) {

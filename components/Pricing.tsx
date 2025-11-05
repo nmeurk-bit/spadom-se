@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { auth } from '@/lib/firebase';
+import { getFirebaseAuth } from '@/lib/firebase';
 
 // Priser - dessa är exempel och kan ändras
 const PRICING_TIERS = [
@@ -41,8 +41,8 @@ export default function Pricing() {
 
     try {
       // För 5 och 10, kontrollera att användaren är inloggad
-      const user = auth.currentUser;
-      
+      const user = getFirebaseAuth().currentUser;
+
       if (quantity !== 1 && !user) {
         setError('Du måste vara inloggad för att köpa detta paket.');
         setLoading(null);
