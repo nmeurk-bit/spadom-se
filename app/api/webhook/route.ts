@@ -8,12 +8,12 @@ export async function POST(req: Request) {
   const secret = process.env.STRIPE_SECRET_KEY;
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
-  // Saknas nycklar? Kör mjukt läge så build alltid funkar
+  // Om nycklar saknas: gör inget men låt build gå igenom
   if (!secret || !webhookSecret) {
     return NextResponse.json({ ok: true, disabled: 'stripe' });
   }
 
-  // ✅ Lazy-import och ingen apiVersion (undviker TS-literal-fel)
+  // ✅ Lazy import och ingen apiVersion (undviker TS-literal-fel)
   const Stripe = (await import('stripe')).default as any;
   const stripe = new Stripe(secret as string);
 
@@ -24,7 +24,7 @@ export async function POST(req: Request) {
     if (signature) {
       stripe.webhooks.constructEvent(rawBody, signature, webhookSecret as string);
     }
-    // här kan du hantera eventet om du vill
+    // Här kan man hantera event, t.ex. checkout.session.completed
     return NextResponse.json({ received: true });
   } catch (err: any) {
     return NextResponse.json(
