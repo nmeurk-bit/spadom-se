@@ -121,9 +121,9 @@ I Stripe Dashboard:
 
 1. Gå till **Products** → **Add Product**
 2. Skapa tre produkter:
-   - **1 spådom** - Pris: 99 SEK
-   - **5 spådomar** - Pris: 399 SEK
-   - **10 spådomar** - Pris: 699 SEK
+   - **1 spådom** - Pris: 20 SEK
+   - **5 spådomar** - Pris: 60 SEK
+   - **10 spådomar** - Pris: 100 SEK
 3. För varje produkt, kopiera **Price ID** (börjar med `price_...`)
 
 #### 2.3 Konfigurera webhook

@@ -159,9 +159,9 @@ export default function KontoPage() {
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {[
-            { quantity: 1 as const, name: '1 spådom', price: '99 kr' },
-            { quantity: 5 as const, name: '5 spådomar', price: '399 kr' },
-            { quantity: 10 as const, name: '10 spådomar', price: '699 kr' },
+            { quantity: 1 as const, name: '1 spådom', price: '20 kr' },
+            { quantity: 5 as const, name: '5 spådomar', price: '60 kr' },
+            { quantity: 10 as const, name: '10 spådomar', price: '100 kr' },
           ].map((tier) => (
             <button
               key={tier.quantity}
