@@ -1,6 +1,6 @@
 # Spådom.se - AI-driven Spådomstjänst
 
-Ett komplett e-handelssystem för försäljning av AI-genererade spådomar, byggt med Next.js 14, Firebase och Stripe.
+Ett komplett e-handelssystem för försäljning av AI-genererade spådomar, byggt med Next.js 14, Firebase, Stripe och Vercel.
 
 ## 📋 Innehållsförteckning
 
@@ -20,9 +20,10 @@ Ett komplett e-handelssystem för försäljning av AI-genererade spådomar, bygg
 Spådom.se är en produktionsredo webbapplikation som låter användare köpa och beställa AI-genererade spådomar. Projektet inkluderar:
 
 - **Next.js 14** frontend med App Router och TypeScript
-- **Firebase** för autentisering, datalagring och hosting
+- **Vercel** för hosting och deployment
+- **Firebase** för autentisering och datalagring (Firestore)
 - **Stripe Checkout** för säkra betalningar
-- **Cloud Functions** för webhook-hantering
+- **API Routes** för webhook-hantering
 - **Responsiv design** med Tailwind CSS
 - **SEO-optimering** och tillgänglighet
 - **GDPR-kompatibel** struktur
@@ -35,15 +36,16 @@ Spådom.se är en produktionsredo webbapplikation som låter användare köpa oc
 - Tailwind CSS
 - Firebase SDK (Auth, Firestore)
 
-### Backend
-- Firebase Cloud Functions (TypeScript)
+### Backend & Hosting
+- Vercel (hosting och serverless functions)
+- Next.js API Routes (TypeScript)
 - Firebase Firestore (databas)
-- Firebase Hosting
+- Firebase Authentication
 - Stripe Checkout & Webhooks
 
 ### Betalningar
 - Stripe Checkout för kortbetalningar
-- Webhook-hantering via Cloud Functions
+- Webhook-hantering via Next.js API Routes
 
 ## 📦 Förutsättningar
 
@@ -51,10 +53,11 @@ Innan du börjar, se till att du har:
 
 - **Node.js** 18+ LTS
 - **npm** eller **pnpm**
-- **Firebase CLI**: `npm install -g firebase-tools`
+- **Vercel CLI**: `npm install -g vercel`
 - **Stripe CLI** (för lokal testing): https://stripe.com/docs/stripe-cli
-- Ett **Firebase-projekt** (se nedan)
+- Ett **Firebase-projekt** (för databas och auth)
 - Ett **Stripe-konto**
+- Ett **Vercel-konto** (gratis på https://vercel.com)
 
 ## 🚀 Installation
 
@@ -68,13 +71,7 @@ cd spadom-se
 ### 2. Installera dependencies
 
 ```bash
-# Huvudprojekt
 npm install
-
-# Cloud Functions
-cd functions
-npm install
-cd ..
 ```
 
 ## ⚙️ Konfiguration
@@ -96,8 +93,6 @@ cd ..
 I Firebase Console, aktivera:
 - **Authentication** → Sign-in method → Email/Password → **Email link (passwordless)**
 - **Firestore Database** (välj EU-region)
-- **Cloud Functions** (Blaze plan krävs för externa API-anrop)
-- **Hosting**
 
 #### 1.3 Hämta Firebase-konfiguration
 
@@ -105,26 +100,11 @@ I Firebase Console, aktivera:
 2. Scrolla ner till "Your apps" → Lägg till webb-app
 3. Kopiera Firebase-konfigurationen
 
-#### 1.4 Konfigurera Firebase CLI
+#### 1.4 Deploya Firestore rules (valfritt vid lokal utveckling)
 
 ```bash
 firebase login
-firebase init
-```
-
-Välj:
-- **Firestore**: Yes (använd befintliga `firestore.rules` och `firestore.indexes.json`)
-- **Functions**: Yes (TypeScript, använd `functions`-mappen)
-- **Hosting**: Yes (använd `out` som public directory, SPA: No, GitHub: No)
-
-Uppdatera `.firebaserc` med ditt projekt-ID:
-
-```json
-{
-  "projects": {
-    "default": "ditt-projekt-id"
-  }
-}
+firebase deploy --only firestore:rules,firestore:indexes
 ```
 
 ### Stripe Setup
@@ -149,15 +129,13 @@ I Stripe Dashboard:
 #### 2.3 Konfigurera webhook
 
 1. I Stripe Dashboard: **Developers** → **Webhooks** → **Add endpoint**
-2. URL: `https://europe-west1-<ditt-projekt>.cloudfunctions.net/stripeWebhook/webhook`
+2. URL: `https://ditt-projekt.vercel.app/api/webhook` (uppdateras efter deployment)
 3. Lyssna på events: `checkout.session.completed`
 4. Kopiera **Signing secret** (börjar med `whsec_...`)
 
 ### Miljövariabler
 
-#### 3.1 Webb (.env.local)
-
-Skapa `.env.local` i projektets root:
+Skapa `.env.local` i projektets root (se `.env.example` för mall):
 
 ```bash
 # Firebase
@@ -170,27 +148,13 @@ NEXT_PUBLIC_FIREBASE_APP_ID=1:123456789:web:abcdef
 
 # Stripe (Server-side)
 STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
 STRIPE_PRICE_ID_1=price_...  # 1 spådom
 STRIPE_PRICE_ID_5=price_...  # 5 spådomar
 STRIPE_PRICE_ID_10=price_... # 10 spådomar
 
 # Base URL
 NEXT_PUBLIC_BASE_URL=http://localhost:3000
-```
-
-#### 3.2 Functions (functions/.env)
-
-Skapa `functions/.env`:
-
-```bash
-STRIPE_SECRET_KEY=sk_test_...
-STRIPE_WEBHOOK_SECRET=whsec_...
-```
-
-**VIKTIGT:** Lägg också till dessa som Environment Variables i Firebase:
-
-```bash
-firebase functions:config:set stripe.secret_key="sk_test_..." stripe.webhook_secret="whsec_..."
 ```
 
 ## 💻 Lokal Utveckling
@@ -216,20 +180,11 @@ scoop install stripe  # Windows
 # Logga in
 stripe login
 
-# Forwarda webhooks till Cloud Functions (lokalt)
-stripe listen --forward-to http://localhost:5001/<ditt-projekt-id>/europe-west1/stripeWebhook/webhook
+# Forwarda webhooks till lokal API route
+stripe listen --forward-to http://localhost:3000/api/webhook
 ```
 
-Kopiera webhook signing secret och uppdatera `functions/.env`.
-
-### Starta Firebase Emulators (valfritt)
-
-För att testa Cloud Functions lokalt:
-
-```bash
-cd functions
-npm run serve
-```
+Kopiera webhook signing secret och uppdatera `.env.local`.
 
 ## 🧪 Testing
 
@@ -273,38 +228,67 @@ Decline: 4000 0000 0000 0002
 
 ## 🚢 Deployment
 
-### 1. Bygg Next.js
+### 1. Pusha till GitHub
 
 ```bash
-npm run build
-npm run export  # Om du använder static export
+git add .
+git commit -m "Migrera till Vercel"
+git push origin main
 ```
 
-### 2. Deploya till Firebase
+### 2. Deploya till Vercel
+
+#### Via Vercel Dashboard (Rekommenderat)
+
+1. Gå till [vercel.com](https://vercel.com)
+2. Klicka "New Project"
+3. Importera ditt GitHub repository
+4. Konfigurera miljövariabler (se `.env.example`)
+5. Klicka "Deploy"
+
+#### Via Vercel CLI
 
 ```bash
-# Deploya allt
-firebase deploy
+# Installera Vercel CLI om du inte har det
+npm install -g vercel
 
-# Eller stegvis:
-firebase deploy --only firestore:rules  # Firestore rules
-firebase deploy --only functions        # Cloud Functions
-firebase deploy --only hosting          # Next.js app
+# Logga in
+vercel login
+
+# Deploya
+vercel --prod
 ```
 
-### 3. Uppdatera Stripe Webhook URL
+### 3. Konfigurera miljövariabler i Vercel
 
-Efter deploy, uppdatera webhook URL i Stripe Dashboard till:
+I Vercel Dashboard → ditt projekt → Settings → Environment Variables, lägg till:
+
 ```
-https://europe-west1-<ditt-projekt>.cloudfunctions.net/stripeWebhook/webhook
+NEXT_PUBLIC_FIREBASE_API_KEY
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+NEXT_PUBLIC_FIREBASE_PROJECT_ID
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+NEXT_PUBLIC_FIREBASE_APP_ID
+STRIPE_SECRET_KEY
+STRIPE_WEBHOOK_SECRET
+STRIPE_PRICE_ID_1
+STRIPE_PRICE_ID_5
+STRIPE_PRICE_ID_10
+NEXT_PUBLIC_BASE_URL=https://ditt-projekt.vercel.app
 ```
 
-### 4. Uppdatera miljövariabler
+### 4. Uppdatera Stripe Webhook URL
 
-Uppdatera `NEXT_PUBLIC_BASE_URL` till din produktions-URL:
+Efter deployment, uppdatera webhook URL i Stripe Dashboard till:
+```
+https://ditt-projekt.vercel.app/api/webhook
+```
+
+### 5. Deploya Firestore Rules
 
 ```bash
-NEXT_PUBLIC_BASE_URL=https://spadom.se
+firebase deploy --only firestore:rules,firestore:indexes
 ```
 
 ## 🔒 Säkerhet
