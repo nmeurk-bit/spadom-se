@@ -1,26 +1,24 @@
-// app/api/webhook/route.ts - Stripe webhook för Vercel
+// app/api/webhook/route.ts - Stripe webhook för Vercel (soft-off)
 import { NextRequest, NextResponse } from 'next/server';
-import Stripe from 'stripe';
 import { ensureUserByEmail } from '@/lib/firestore';
 import { firestore } from '@/lib/firebase';
-import { doc, runTransaction, Timestamp, collection, setDoc, increment } from 'firebase/firestore';
+import { doc, runTransaction, Timestamp, collection, setDoc } from 'firebase/firestore';
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('STRIPE_SECRET_KEY is not defined');
-}
-
-if (!process.env.STRIPE_WEBHOOK_SECRET) {
-  throw new Error('STRIPE_WEBHOOK_SECRET is not defined');
-}
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2024-11-20.acacia',
-});
-
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
+    // Soft-off: Om Stripe-nycklar saknas, returnera OK utan att köra Stripe-kod
+    if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET) {
+      return NextResponse.json({ ok: true, disabled: 'stripe' }, { status: 200 });
+    }
+
+    // Lazy import av Stripe (endast om nycklar finns)
+    const Stripe = (await import('stripe')).default as any;
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
     const body = await request.text();
     const signature = request.headers.get('stripe-signature');
 
@@ -32,7 +30,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    let event: Stripe.Event;
+    let event: any;
 
     try {
       event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
@@ -46,7 +44,7 @@ export async function POST(request: NextRequest) {
 
     // Hantera checkout.session.completed event
     if (event.type === 'checkout.session.completed') {
-      const session = event.data.object as Stripe.Checkout.Session;
+      const session = event.data.object;
 
       try {
         await handleCheckoutCompleted(session);
@@ -71,7 +69,7 @@ export async function POST(request: NextRequest) {
 }
 
 // Hantera completed checkout
-async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
+async function handleCheckoutCompleted(session: any) {
   const customerEmail = session.customer_details?.email || session.customer_email;
   const quantity = parseInt(session.metadata?.quantity || '0');
   const amount = session.amount_total || 0;

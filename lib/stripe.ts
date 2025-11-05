@@ -1,16 +1,6 @@
-// lib/stripe.ts
-import Stripe from 'stripe';
+// lib/stripe.ts - Soft-off Stripe (valfritt utan build-fel)
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('STRIPE_SECRET_KEY is not defined in environment variables');
-}
-
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2024-11-20.acacia',
-  typescript: true,
-});
-
-// Price constants - dessa ska matcha dina Stripe Price IDs
+// Returnera tomma strängar om nycklar saknas
 export const PRICE_IDS = {
   ONE: process.env.STRIPE_PRICE_ID_1 || '',
   FIVE: process.env.STRIPE_PRICE_ID_5 || '',
@@ -29,4 +19,14 @@ export function getPriceIdForQuantity(quantity: 1 | 5 | 10): string {
     default:
       throw new Error(`Invalid quantity: ${quantity}`);
   }
+}
+
+// Lazy export som skapar Stripe-instans på begäran
+export async function getStripeInstance() {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    throw new Error('STRIPE_SECRET_KEY is not defined');
+  }
+
+  const Stripe = (await import('stripe')).default as any;
+  return new Stripe(process.env.STRIPE_SECRET_KEY);
 }

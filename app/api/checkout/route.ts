@@ -1,11 +1,16 @@
-// app/api/checkout/route.ts (Vercel-kompatibel version)
+// app/api/checkout/route.ts (Vercel-kompatibel version med soft-off)
 import { NextRequest, NextResponse } from 'next/server';
-import { stripe, getPriceIdForQuantity } from '@/lib/stripe';
+import { getPriceIdForQuantity } from '@/lib/stripe';
 
 export async function POST(request: NextRequest) {
   try {
+    // Soft-off: Om Stripe-nyckel saknas, returnera OK utan att köra Stripe-kod
+    if (!process.env.STRIPE_SECRET_KEY) {
+      return NextResponse.json({ ok: true, disabled: 'stripe' }, { status: 200 });
+    }
+
     const body = await request.json();
-    const { quantity, userId } = body; // Ta emot userId från frontend istället
+    const { quantity, userId } = body;
 
     // Validera quantity
     if (![1, 5, 10].includes(quantity)) {
@@ -32,6 +37,10 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
+
+    // Lazy import av Stripe (endast om nyckel finns)
+    const Stripe = (await import('stripe')).default as any;
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
     // Skapa Stripe Checkout session
     const session = await stripe.checkout.sessions.create({
