@@ -1,0 +1,75 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+    
+    function isValidEmail(email) {
+      return email.matches('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$');
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      // Användare kan läsa och skriva sin egen profil
+      allow read, write: if isOwner(userId);
+      
+      // Validering vid skapande
+      allow create: if isSignedIn() 
+                    && request.resource.data.keys().hasAll(['email', 'createdAt'])
+                    && isValidEmail(request.resource.data.email)
+                    && request.resource.data.createdAt is timestamp;
+    }
+    
+    // Wallets collection
+    // KRITISKT: Endast Cloud Functions får skriva till wallets!
+    match /wallets/{userId} {
+      // Användare kan endast LÄSA sitt eget wallet-saldo
+      allow read: if isOwner(userId);
+      
+      // INGEN klient får skriva till wallets
+      // Endast Cloud Functions (som har admin-åtkomst) kan skriva
+      allow write: if false;
+    }
+    
+    // Orders collection
+    match /orders/{orderId} {
+      // Användare kan endast läsa sina egna orders
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      
+      // Ingen klient får skriva till orders
+      // Endast Cloud Functions skapar orders
+      allow write: if false;
+    }
+    
+    // Readings collection
+    match /readings/{readingId} {
+      // Användare kan läsa sina egna readings
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      
+      // Användare kan skapa readings (via atomisk transaktion i kod)
+      allow create: if isSignedIn()
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.keys().hasAll(['userId', 'question', 'category', 'status', 'createdAt'])
+                    && request.resource.data.question is string
+                    && request.resource.data.question.size() >= 10
+                    && request.resource.data.category in ['love', 'career', 'finance', 'general']
+                    && request.resource.data.status == 'received'
+                    && request.resource.data.createdAt is timestamp;
+      
+      // Cloud Functions kan uppdatera status
+      // Klienter kan inte uppdatera
+      allow update: if false;
+      
+      // Ingen får radera readings
+      allow delete: if false;
+    }
+  }
+}
