@@ -14,7 +14,10 @@ import {
   runTransaction,
   increment,
 } from 'firebase/firestore';
-import { firestore } from './firebase';
+import { getFirebaseFirestore } from './firebase';
+
+// Helper to get firestore instance
+const getDb = () => getFirebaseFirestore();
 
 // Typer
 export interface User {
@@ -46,7 +49,7 @@ export interface Reading {
 
 // Hämta användare baserat på email
 export async function getUserByEmail(email: string): Promise<{ id: string; data: User } | null> {
-  const usersRef = collection(firestore, 'users');
+  const usersRef = collection(getDb(), 'users');
   const q = query(usersRef, where('email', '==', email), limit(1));
   const snapshot = await getDocs(q);
 
@@ -70,7 +73,7 @@ export async function ensureUserByEmail(email: string): Promise<string> {
   }
 
   // Skapa ny användare
-  const userRef = doc(collection(firestore, 'users'));
+  const userRef = doc(collection(getDb(), 'users'));
   const userId = userRef.id;
 
   await setDoc(userRef, {
@@ -79,7 +82,7 @@ export async function ensureUserByEmail(email: string): Promise<string> {
   });
 
   // Skapa wallet för användaren
-  const walletRef = doc(firestore, 'wallets', userId);
+  const walletRef = doc(getDb(), 'wallets', userId);
   await setDoc(walletRef, {
     balance: 0,
     updatedAt: Timestamp.now(),
@@ -90,7 +93,7 @@ export async function ensureUserByEmail(email: string): Promise<string> {
 
 // Hämta wallet
 export async function getWallet(userId: string): Promise<Wallet | null> {
-  const walletRef = doc(firestore, 'wallets', userId);
+  const walletRef = doc(getDb(), 'wallets', userId);
   const walletSnap = await getDoc(walletRef);
 
   if (!walletSnap.exists()) {
@@ -103,7 +106,7 @@ export async function getWallet(userId: string): Promise<Wallet | null> {
 // Öka wallet balance (används endast av Cloud Functions)
 // Denna funktion ska INTE anropas från klient-kod
 export async function incWallet(userId: string, amount: number): Promise<void> {
-  const walletRef = doc(firestore, 'wallets', userId);
+  const walletRef = doc(getDb(), 'wallets', userId);
   await updateDoc(walletRef, {
     balance: increment(amount),
     updatedAt: Timestamp.now(),
@@ -112,7 +115,7 @@ export async function incWallet(userId: string, amount: number): Promise<void> {
 
 // Skapa order
 export async function createOrder(orderData: Omit<Order, 'createdAt'>): Promise<string> {
-  const orderRef = doc(collection(firestore, 'orders'));
+  const orderRef = doc(collection(getDb(), 'orders'));
   await setDoc(orderRef, {
     ...orderData,
     createdAt: Timestamp.now(),
@@ -126,8 +129,8 @@ export async function createReadingAtomic(
   readingData: Omit<Reading, 'userId' | 'status' | 'createdAt'>
 ): Promise<{ success: boolean; readingId?: string; error?: string }> {
   try {
-    const result = await runTransaction(firestore, async (transaction) => {
-      const walletRef = doc(firestore, 'wallets', userId);
+    const result = await runTransaction(getDb(), async (transaction) => {
+      const walletRef = doc(getDb(), 'wallets', userId);
       const walletSnap = await transaction.get(walletRef);
 
       if (!walletSnap.exists()) {
@@ -141,7 +144,7 @@ export async function createReadingAtomic(
       }
 
       // Skapa reading
-      const readingRef = doc(collection(firestore, 'readings'));
+      const readingRef = doc(collection(getDb(), 'readings'));
       transaction.set(readingRef, {
         userId,
         ...readingData,
@@ -170,7 +173,7 @@ export async function createReadingAtomic(
 
 // Lista orders för användare
 export async function listOrdersForUser(userId: string, limitCount: number = 10): Promise<Array<Order & { id: string }>> {
-  const ordersRef = collection(firestore, 'orders');
+  const ordersRef = collection(getDb(), 'orders');
   const q = query(
     ordersRef,
     where('userId', '==', userId),
@@ -187,7 +190,7 @@ export async function listOrdersForUser(userId: string, limitCount: number = 10)
 
 // Lista readings för användare
 export async function listReadingsForUser(userId: string, limitCount: number = 10): Promise<Array<Reading & { id: string }>> {
-  const readingsRef = collection(firestore, 'readings');
+  const readingsRef = collection(getDb(), 'readings');
   const q = query(
     readingsRef,
     where('userId', '==', userId),

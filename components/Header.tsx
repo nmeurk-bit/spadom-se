@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { auth } from '@/lib/firebase';
+import { getFirebaseAuth } from '@/lib/firebase';
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 
 export default function Header() {
@@ -11,7 +11,7 @@ export default function Header() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(getFirebaseAuth(), (currentUser) => {
       setUser(currentUser);
       setLoading(false);
     });
@@ -21,7 +21,7 @@ export default function Header() {
 
   const handleLogout = async () => {
     try {
-      await signOut(auth);
+      await signOut(getFirebaseAuth());
     } catch (error) {
       console.error('Logout error:', error);
     }
