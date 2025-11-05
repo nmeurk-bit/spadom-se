@@ -174,33 +174,51 @@ export async function createReadingAtomic(
 // Lista orders för användare
 export async function listOrdersForUser(userId: string, limitCount: number = 10): Promise<Array<Order & { id: string }>> {
   const ordersRef = collection(getDb(), 'orders');
+  // Remove orderBy to avoid requiring composite index - sort in JS instead
   const q = query(
     ordersRef,
     where('userId', '==', userId),
-    orderBy('createdAt', 'desc'),
-    limit(limitCount)
+    limit(limitCount * 2) // Get more to ensure we have enough after sorting
   );
 
   const snapshot = await getDocs(q);
-  return snapshot.docs.map(doc => ({
+  const orders = snapshot.docs.map(doc => ({
     id: doc.id,
     ...doc.data() as Order,
   }));
+
+  // Sort by createdAt descending (newest first) in JavaScript
+  return orders
+    .sort((a, b) => {
+      const timeA = a.createdAt?.toMillis?.() || 0;
+      const timeB = b.createdAt?.toMillis?.() || 0;
+      return timeB - timeA;
+    })
+    .slice(0, limitCount); // Take only the requested number
 }
 
 // Lista readings för användare
 export async function listReadingsForUser(userId: string, limitCount: number = 10): Promise<Array<Reading & { id: string }>> {
   const readingsRef = collection(getDb(), 'readings');
+  // Remove orderBy to avoid requiring composite index - sort in JS instead
   const q = query(
     readingsRef,
     where('userId', '==', userId),
-    orderBy('createdAt', 'desc'),
-    limit(limitCount)
+    limit(limitCount * 2) // Get more to ensure we have enough after sorting
   );
 
   const snapshot = await getDocs(q);
-  return snapshot.docs.map(doc => ({
+  const readings = snapshot.docs.map(doc => ({
     id: doc.id,
     ...doc.data() as Reading,
   }));
+
+  // Sort by createdAt descending (newest first) in JavaScript
+  return readings
+    .sort((a, b) => {
+      const timeA = a.createdAt?.toMillis?.() || 0;
+      const timeB = b.createdAt?.toMillis?.() || 0;
+      return timeB - timeA;
+    })
+    .slice(0, limitCount); // Take only the requested number
 }
