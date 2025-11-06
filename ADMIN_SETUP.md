@@ -10,7 +10,18 @@ Admin-dashboarden ger dig möjlighet att:
 - Justera kundsaldon (lägg till/ta bort spådomar)
 - Se audit log över alla admin-ändringar
 
-## Skapa en Admin-användare
+## Snabbstart: Gör dig själv till admin
+
+**Enklaste sättet:**
+
+1. Gå till `/admin/setup` på din sajt (t.ex. https://spadom.se/admin/setup)
+2. Logga in om du inte redan är inloggad
+3. Kopiera din **User ID (UID)** från sidan
+4. Följ instruktionerna på sidan för att lägga till dig i Firestore
+5. Ladda om sidan för att verifiera att du är admin
+6. Klicka på "Gå till Admin-panel"
+
+## Skapa en Admin-användare (Detaljerade instruktioner)
 
 ### Metod 1: Via Firebase Console (Enklast)
 
