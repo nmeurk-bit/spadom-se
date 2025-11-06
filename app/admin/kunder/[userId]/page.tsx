@@ -7,6 +7,9 @@ import Link from 'next/link';
 import { getFirebaseAuth } from '@/lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 
+// Force dynamic rendering for admin pages
+export const dynamic = 'force-dynamic';
+
 interface UserDetails {
   user: {
     id: string;

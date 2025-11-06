@@ -7,6 +7,9 @@ import Link from 'next/link';
 import { getFirebaseAuth } from '@/lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 
+// Force dynamic rendering to avoid prerender issues with useSearchParams
+export const dynamic = 'force-dynamic';
+
 interface User {
   id: string;
   email: string;
