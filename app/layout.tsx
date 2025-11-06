@@ -42,7 +42,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="sv">
-      <body className="font-sans">
+      <body className="font-sans bg-gray-900">
         <div className="flex flex-col min-h-screen">
           <Header />
           <main className="flex-grow">

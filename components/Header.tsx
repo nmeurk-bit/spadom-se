@@ -47,63 +47,54 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-white dark:bg-gray-900 shadow-sm">
-      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div className="flex justify-between items-center">
-          <Link 
-            href="/" 
-            className="text-2xl font-bold text-mystical-purple hover:text-mystical-gold transition-colors"
-            aria-label="Spådom.se startsida"
+    <header className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-b from-gray-900/95 via-gray-900/90 to-transparent backdrop-blur-sm">
+      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="flex justify-end items-center gap-4">
+          {/* Köp-knapp */}
+          <Link
+            href="/#priser"
+            className="px-6 py-2 bg-gradient-to-r from-mystical-gold/10 to-yellow-500/10 border border-mystical-gold/30 text-mystical-gold rounded-lg hover:from-mystical-gold/20 hover:to-yellow-500/20 hover:border-mystical-gold/50 transition-all backdrop-blur-sm font-semibold"
           >
-            Spådom.se
+            Köp spådom
           </Link>
 
-          <div className="flex items-center gap-6">
-            <Link 
-              href="/#priser" 
-              className="text-gray-700 dark:text-gray-300 hover:text-mystical-purple transition-colors"
-            >
-              Köp
-            </Link>
-
-            {!loading && (
-              <>
-                {user ? (
-                  <>
-                    <Link
-                      href="/konto"
-                      className="text-gray-700 dark:text-gray-300 hover:text-mystical-purple transition-colors"
-                    >
-                      Konto
-                    </Link>
-                    {isAdmin && (
-                      <Link
-                        href="/admin"
-                        className="text-mystical-gold hover:text-mystical-purple transition-colors font-semibold"
-                        aria-label="Admin-panel"
-                      >
-                        Admin
-                      </Link>
-                    )}
-                    <button
-                      onClick={handleLogout}
-                      className="text-gray-700 dark:text-gray-300 hover:text-mystical-purple transition-colors"
-                      aria-label="Logga ut"
-                    >
-                      Logga ut
-                    </button>
-                  </>
-                ) : (
+          {!loading && (
+            <>
+              {user ? (
+                <>
                   <Link
-                    href="/login"
-                    className="bg-mystical-purple text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition-colors"
+                    href="/konto"
+                    className="px-6 py-2 bg-white/5 border border-white/10 text-white rounded-lg hover:bg-white/10 hover:border-white/20 transition-all backdrop-blur-sm"
                   >
-                    Logga in
+                    Mitt konto
                   </Link>
-                )}
-              </>
-            )}
-          </div>
+                  {isAdmin && (
+                    <Link
+                      href="/admin"
+                      className="px-6 py-2 bg-mystical-purple/20 border border-mystical-purple/40 text-mystical-gold rounded-lg hover:bg-mystical-purple/30 hover:border-mystical-purple/60 transition-all backdrop-blur-sm font-semibold"
+                      aria-label="Admin-panel"
+                    >
+                      Admin
+                    </Link>
+                  )}
+                  <button
+                    onClick={handleLogout}
+                    className="px-6 py-2 bg-white/5 border border-white/10 text-gray-300 rounded-lg hover:bg-red-900/20 hover:border-red-500/30 hover:text-red-300 transition-all backdrop-blur-sm"
+                    aria-label="Logga ut"
+                  >
+                    Logga ut
+                  </button>
+                </>
+              ) : (
+                <Link
+                  href="/login"
+                  className="px-6 py-2 bg-gradient-to-r from-mystical-purple to-purple-600 border border-mystical-purple/50 text-white rounded-lg hover:from-purple-600 hover:to-mystical-purple hover:border-mystical-gold/50 transition-all shadow-lg hover:shadow-mystical-purple/50 font-semibold"
+                >
+                  Logga in
+                </Link>
+              )}
+            </>
+          )}
         </div>
       </nav>
     </header>
