@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+
 export default function HowItWorks() {
   const scrollToPricing = () => {
     const section = document.getElementById('priser');
@@ -10,50 +12,35 @@ export default function HowItWorks() {
 
   const steps = [
     {
-      icon: (
-        <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-        </svg>
-      ),
+      iconSrc: '/ikon-vem.png',
+      iconAlt: 'Ikon för att välja vem spådomen gäller',
       title: 'Välj vem spådomen gäller',
       description: 'Skriv namnet – det kan vara du själv eller någon annan.',
     },
     {
-      icon: (
-        <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-        </svg>
-      ),
+      iconSrc: '/ikon-kategori.png',
+      iconAlt: 'Ikon för att välja kategori',
       title: 'Välj kategori',
       description: 'Välj det område du vill ha vägledning inom.',
       badges: ['❤️ Kärlek', '💰 Ekonomi', '🌈 Självutveckling', '🌙 Andlighet', '🕰️ Framtiden', '✨ Övrigt'],
     },
     {
-      icon: (
-        <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-        </svg>
-      ),
+      iconSrc: '/ikon-fraga.png',
+      iconAlt: 'Ikon för att skriva fråga',
       title: 'Skriv din fråga',
       description: 'Formulera dig öppet men tydligt. Be gärna om vägledning istället för ja/nej.',
       example: 'Exempel: "Vad behöver jag förstå om min relation just nu?"',
       avoid: 'Undvik: bara ett ord eller enbart ja/nej-frågor.',
     },
     {
-      icon: (
-        <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-        </svg>
-      ),
+      iconSrc: '/ikon-vand.png',
+      iconAlt: 'Ikon för att vända kortet',
       title: 'Vänd kortet',
       description: 'Du får ett digitalt spåkort. Klicka eller tryck för att vända det – svaret visas med ett poetiskt AI-budskap.',
     },
     {
-      icon: (
-        <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-      ),
+      iconSrc: '/ikon-historik.png',
+      iconAlt: 'Ikon för historik och saldo',
       title: 'Din historik & saldo',
       description: 'Varje gång du använder en spådom dras 1 från ditt saldo. Du kan alltid se dina tidigare spådomar och ditt saldo på "Mitt konto".',
     },
@@ -80,8 +67,14 @@ export default function HowItWorks() {
               className="bg-gray-800/50 backdrop-blur-sm border border-mystical-purple/30 rounded-2xl p-8 hover:border-mystical-purple hover:mystical-glow transition-all duration-300"
             >
               {/* Ikon */}
-              <div className="w-16 h-16 bg-gradient-to-br from-mystical-purple to-purple-700 text-white rounded-xl flex items-center justify-center mb-6 mystical-glow">
-                {step.icon}
+              <div className="w-20 h-20 bg-gradient-to-br from-mystical-purple to-purple-700 rounded-xl flex items-center justify-center mb-6 mystical-glow p-3">
+                <Image
+                  src={step.iconSrc}
+                  alt={step.iconAlt}
+                  width={64}
+                  height={64}
+                  className="w-full h-full object-contain"
+                />
               </div>
 
               {/* Stegnummer */}

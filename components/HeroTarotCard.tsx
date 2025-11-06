@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion, useMotionValue, useTransform } from 'framer-motion';
 import { getFirebaseAuth } from '@/lib/firebase';
+import Image from 'next/image';
 
 export default function HeroTarotCard() {
   const [isFlipped, setIsFlipped] = useState(false);
@@ -145,33 +146,14 @@ export default function HeroTarotCard() {
         {/* Framsida (baksidan av tarotkortet) */}
         <div
           className="absolute inset-0 backface-hidden rounded-2xl overflow-hidden mystical-glow"
-          style={{
-            background: 'linear-gradient(135deg, #1a0b2e 0%, #2d1b4e 50%, #1a0b2e 100%)',
-          }}
         >
-          <div className="w-full h-full p-8 flex items-center justify-center relative">
-            {/* Dekorativt mönster */}
-            <div className="absolute inset-0 opacity-20">
-              <div className="w-full h-full" style={{
-                backgroundImage: `
-                  radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.1) 1px, transparent 1px),
-                  radial-gradient(circle at 25% 25%, rgba(107, 70, 193, 0.1) 1px, transparent 1px)
-                `,
-                backgroundSize: '50px 50px, 30px 30px',
-              }}></div>
-            </div>
-
-            {/* Centralt symbol/design */}
-            <div className="relative z-10">
-              <div className="w-40 h-40 border-4 border-mystical-gold rounded-full flex items-center justify-center mystical-glow-gold">
-                <div className="w-32 h-32 border-2 border-mystical-purple rounded-full flex items-center justify-center">
-                  <svg className="w-24 h-24 text-mystical-gold" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </div>
+          <Image
+            src="/tarot-back.png"
+            alt="Baksidan av tarotkort"
+            fill
+            className="object-cover"
+            priority
+          />
         </div>
 
         {/* Baksida (CTA-innehåll) */}
