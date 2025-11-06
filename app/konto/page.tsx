@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getFirebaseAuth } from '@/lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
-import { getWallet, listOrdersForUser, listReadingsForUser } from '@/lib/firestore';
+import { getOrCreateWallet, listOrdersForUser, listReadingsForUser } from '@/lib/firestore';
 import type { Order, Reading } from '@/lib/firestore';
 import ErrorBanner from '@/components/ErrorBanner';
 
@@ -26,9 +26,9 @@ export default function KontoPage() {
       }
 
       try {
-        // Hämta wallet
-        const wallet = await getWallet(user.uid);
-        setBalance(wallet?.balance || 0);
+        // Hämta eller skapa wallet
+        const wallet = await getOrCreateWallet(user.uid);
+        setBalance(wallet.balance);
 
         // Hämta orders
         const userOrders = await listOrdersForUser(user.uid);
@@ -38,7 +38,7 @@ export default function KontoPage() {
         const userReadings = await listReadingsForUser(user.uid);
         setReadings(userReadings);
       } catch (err: any) {
-        setError('Kunde inte ladda kontoinformation');
+        setError('Kunde inte ladda kontoinformation. Försök igen eller kontakta support om problemet kvarstår.');
         console.error('Load error:', err);
       } finally {
         setLoading(false);

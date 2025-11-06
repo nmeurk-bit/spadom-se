@@ -103,6 +103,25 @@ export async function getWallet(userId: string): Promise<Wallet | null> {
   return walletSnap.data() as Wallet;
 }
 
+// Hämta eller skapa wallet
+export async function getOrCreateWallet(userId: string): Promise<Wallet> {
+  const walletRef = doc(getDb(), 'wallets', userId);
+  const walletSnap = await getDoc(walletRef);
+
+  if (walletSnap.exists()) {
+    return walletSnap.data() as Wallet;
+  }
+
+  // Skapa ny wallet om den inte finns
+  const newWallet: Wallet = {
+    balance: 0,
+    updatedAt: Timestamp.now(),
+  };
+
+  await setDoc(walletRef, newWallet);
+  return newWallet;
+}
+
 // Öka wallet balance (används endast av Cloud Functions)
 // Denna funktion ska INTE anropas från klient-kod
 export async function incWallet(userId: string, amount: number): Promise<void> {
