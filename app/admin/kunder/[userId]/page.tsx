@@ -51,8 +51,13 @@ export default function AdminKundDetaljPage({ params }: { params: { userId: stri
   const [showAdjustForm, setShowAdjustForm] = useState(false);
 
   useEffect(() => {
+    console.log('[AdminKundDetalj] useEffect running for userId:', params.userId);
+
     const unsubscribe = onAuthStateChanged(getFirebaseAuth(), async (user) => {
+      console.log('[AdminKundDetalj] Auth state changed, user:', user?.email);
+
       if (!user) {
+        console.log('[AdminKundDetalj] No user, redirecting to /login');
         router.push('/login');
         return;
       }
@@ -62,23 +67,27 @@ export default function AdminKundDetaljPage({ params }: { params: { userId: stri
         const token = await user.getIdToken();
         setUserToken(token);
 
+        console.log('[AdminKundDetalj] Checking admin status...');
         const checkResponse = await fetch('/api/admin/check', {
           headers: { Authorization: `Bearer ${token}` },
         });
         const checkData = await checkResponse.json();
+        console.log('[AdminKundDetalj] Admin check response:', checkData);
 
         if (!checkData.isAdmin) {
+          console.log('[AdminKundDetalj] User is NOT admin, redirecting to /konto');
           router.push('/konto');
           return;
         }
 
+        console.log('[AdminKundDetalj] User IS admin, loading details...');
         setIsAdmin(true);
 
         // Load user details
         await loadUserDetails(token);
       } catch (err: any) {
         setError('Kunde inte ladda kunddata');
-        console.error('Admin load error:', err);
+        console.error('[AdminKundDetalj] Admin load error:', err);
       } finally {
         setLoading(false);
       }
@@ -89,19 +98,25 @@ export default function AdminKundDetaljPage({ params }: { params: { userId: stri
 
   const loadUserDetails = async (token: string) => {
     try {
+      console.log('[AdminKundDetalj] Loading details for userId:', params.userId);
       const response = await fetch(`/api/admin/users/${params.userId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
+      console.log('[AdminKundDetalj] User details response status:', response.status);
+
       if (!response.ok) {
-        throw new Error('Failed to fetch user details');
+        const errorData = await response.json();
+        console.error('[AdminKundDetalj] Failed to fetch user details:', errorData);
+        throw new Error(errorData.error || 'Failed to fetch user details');
       }
 
       const data = await response.json();
+      console.log('[AdminKundDetalj] User details loaded successfully:', data.user?.email);
       setDetails(data);
     } catch (err: any) {
-      setError('Kunde inte ladda användardetaljer');
-      console.error('User details load error:', err);
+      setError('Kunde inte ladda användardetaljer: ' + err.message);
+      console.error('[AdminKundDetalj] User details load error:', err);
     }
   };
 
@@ -219,8 +234,40 @@ export default function AdminKundDetaljPage({ params }: { params: { userId: stri
     );
   }
 
-  if (!isAdmin || !details) {
-    return null;
+  if (!isAdmin) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-16">
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-8 text-center">
+          <p className="text-red-800 dark:text-red-200">Du har inte admin-behörighet.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!details) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-16">
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-8">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            Kunde inte ladda kunddetaljer
+          </h2>
+          {error && (
+            <p className="text-red-800 dark:text-red-200 mb-4">
+              Fel: {error}
+            </p>
+          )}
+          <p className="text-gray-700 dark:text-gray-300 mb-6">
+            Användare ID: {params.userId}
+          </p>
+          <Link
+            href="/admin/kunder"
+            className="inline-block bg-mystical-purple text-white px-6 py-3 rounded-lg hover:bg-opacity-90 transition-colors"
+          >
+            ← Tillbaka till kundlista
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   return (
