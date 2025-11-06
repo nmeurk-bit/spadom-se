@@ -38,6 +38,7 @@ interface UserDetails {
 export default function AdminKundDetaljPage({ params }: { params: { userId: string } }) {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [authChecked, setAuthChecked] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [details, setDetails] = useState<UserDetails | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -56,8 +57,12 @@ export default function AdminKundDetaljPage({ params }: { params: { userId: stri
     const unsubscribe = onAuthStateChanged(getFirebaseAuth(), async (user) => {
       console.log('[AdminKundDetalj] Auth state changed, user:', user?.email);
 
+      // Mark that we've checked auth status
+      setAuthChecked(true);
+
       if (!user) {
         console.log('[AdminKundDetalj] No user, redirecting to /login');
+        setLoading(false);
         router.push('/login');
         return;
       }
@@ -76,6 +81,7 @@ export default function AdminKundDetaljPage({ params }: { params: { userId: stri
 
         if (!checkData.isAdmin) {
           console.log('[AdminKundDetalj] User is NOT admin, redirecting to /konto');
+          setLoading(false);
           router.push('/konto');
           return;
         }

@@ -249,6 +249,10 @@ export default function AdminKunderContent() {
                       <Link
                         href={`/admin/kunder/${user.id}`}
                         className="text-mystical-purple hover:text-mystical-gold transition-colors font-medium"
+                        onClick={(e) => {
+                          console.log('[AdminKunder] Navigating to user details:', user.id);
+                          console.log('[AdminKunder] Full URL:', `/admin/kunder/${user.id}`);
+                        }}
                       >
                         Visa detaljer →
                       </Link>
