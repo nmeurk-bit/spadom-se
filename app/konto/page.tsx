@@ -85,9 +85,14 @@ export default function KontoPage() {
 
   const getCategoryLabel = (category: string) => {
     const labels: Record<string, string> = {
-      love: 'Kärlek',
+      love: '❤️ Kärlek',
+      finance: '💰 Ekonomi',
+      self_development: '🌈 Självutveckling',
+      spirituality: '🌙 Andlighet',
+      future: '🕰️ Framtiden',
+      other: '✨ Övrigt',
+      // Gamla kategorier för bakåtkompatibilitet
       career: 'Karriär',
-      finance: 'Ekonomi',
       general: 'Allmänt',
     };
     return labels[category] || category;
@@ -198,6 +203,9 @@ export default function KontoPage() {
                     Datum
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    Person
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Kategori
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -215,11 +223,14 @@ export default function KontoPage() {
                       {formatDate(reading.createdAt)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                      {reading.personName || '-'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                       {getCategoryLabel(reading.category)}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">
-                      {reading.question.length > 50
-                        ? reading.question.substring(0, 50) + '...'
+                      {reading.question.length > 40
+                        ? reading.question.substring(0, 40) + '...'
                         : reading.question}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
