@@ -2,27 +2,51 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    
+
     // Helper functions
     function isSignedIn() {
       return request.auth != null;
     }
-    
+
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
-    
+
     function isValidEmail(email) {
       return email.matches('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$');
     }
+
+    function isAdmin() {
+      return isSignedIn() &&
+             exists(/databases/$(database)/documents/admins/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.isAdmin == true;
+    }
     
+    // Admins collection
+    match /admins/{userId} {
+      // Endast admin kan läsa admin-statusar
+      allow read: if isAdmin() || isOwner(userId);
+      // Ingen klient får skriva - endast Cloud Functions
+      allow write: if false;
+    }
+
+    // Admin logs collection
+    match /admin_logs/{logId} {
+      // Endast admin kan läsa loggar
+      allow read: if isAdmin();
+      // Ingen klient får skriva - endast Cloud Functions
+      allow write: if false;
+    }
+
     // Users collection
     match /users/{userId} {
       // Användare kan läsa och skriva sin egen profil
-      allow read, write: if isOwner(userId);
-      
+      // Admin kan läsa alla användare
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if isOwner(userId);
+
       // Validering vid skapande
-      allow create: if isSignedIn() 
+      allow create: if isSignedIn()
                     && request.resource.data.keys().hasAll(['email', 'createdAt'])
                     && isValidEmail(request.resource.data.email)
                     && request.resource.data.createdAt is timestamp;
@@ -32,28 +56,31 @@ service cloud.firestore {
     // KRITISKT: Endast Cloud Functions får skriva till wallets!
     match /wallets/{userId} {
       // Användare kan endast LÄSA sitt eget wallet-saldo
-      allow read: if isOwner(userId);
-      
+      // Admin kan läsa alla wallets
+      allow read: if isOwner(userId) || isAdmin();
+
       // INGEN klient får skriva till wallets
       // Endast Cloud Functions (som har admin-åtkomst) kan skriva
       allow write: if false;
     }
-    
+
     // Orders collection
     match /orders/{orderId} {
       // Användare kan endast läsa sina egna orders
-      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
-      
+      // Admin kan läsa alla orders
+      allow read: if (isSignedIn() && resource.data.userId == request.auth.uid) || isAdmin();
+
       // Ingen klient får skriva till orders
       // Endast Cloud Functions skapar orders
       allow write: if false;
     }
-    
+
     // Readings collection
     match /readings/{readingId} {
       // Användare kan läsa sina egna readings
-      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
-      
+      // Admin kan läsa alla readings
+      allow read: if (isSignedIn() && resource.data.userId == request.auth.uid) || isAdmin();
+
       // Användare kan skapa readings (via atomisk transaktion i kod)
       allow create: if isSignedIn()
                     && request.resource.data.userId == request.auth.uid
@@ -63,11 +90,11 @@ service cloud.firestore {
                     && request.resource.data.category in ['love', 'career', 'finance', 'general']
                     && request.resource.data.status == 'received'
                     && request.resource.data.createdAt is timestamp;
-      
+
       // Cloud Functions kan uppdatera status
       // Klienter kan inte uppdatera
       allow update: if false;
-      
+
       // Ingen får radera readings
       allow delete: if false;
     }

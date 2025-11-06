@@ -18,6 +18,32 @@ export interface AdminWallet {
   updatedAt: FirebaseFirestore.Timestamp;
 }
 
+export interface AdminUser {
+  email: string;
+  createdAt: FirebaseFirestore.Timestamp;
+}
+
+export interface AdminReading {
+  userId: string;
+  question: string;
+  category: 'love' | 'career' | 'finance' | 'general';
+  birthdate?: string;
+  status: 'received' | 'processing' | 'completed';
+  createdAt: FirebaseFirestore.Timestamp;
+}
+
+export interface AdminLog {
+  adminId: string;
+  adminEmail: string;
+  targetUserId: string;
+  targetUserEmail: string;
+  action: string; // e.g., "+5", "-1", "set=10"
+  prevBalance: number;
+  newBalance: number;
+  note?: string;
+  createdAt: FirebaseFirestore.Timestamp;
+}
+
 // Get or create wallet for user
 export async function getOrCreateWallet(userId: string): Promise<AdminWallet> {
   const db = getAdminFirestore();
@@ -103,4 +129,251 @@ export async function adminEnsureUserByEmail(email: string): Promise<string> {
   await getOrCreateWallet(userRef.id);
 
   return userRef.id;
+}
+
+// ============================================================================
+// ADMIN FUNCTIONS
+// ============================================================================
+
+// Check if user is admin
+export async function isAdmin(userId: string): Promise<boolean> {
+  const db = getAdminFirestore();
+  const adminDoc = await db.collection('admins').doc(userId).get();
+  return adminDoc.exists && adminDoc.data()?.isAdmin === true;
+}
+
+// Set admin status for a user
+export async function setAdminStatus(userId: string, isAdmin: boolean): Promise<void> {
+  const db = getAdminFirestore();
+  await db.collection('admins').doc(userId).set({
+    isAdmin,
+    updatedAt: FieldValue.serverTimestamp(),
+  }, { merge: true });
+}
+
+// Get all users with pagination
+export async function adminGetAllUsers(
+  limit: number = 50,
+  startAfterEmail?: string
+): Promise<Array<{ id: string; email: string; createdAt: FirebaseFirestore.Timestamp }>> {
+  const db = getAdminFirestore();
+  let query = db.collection('users').orderBy('email').limit(limit);
+
+  if (startAfterEmail) {
+    query = query.startAfter(startAfterEmail);
+  }
+
+  const snapshot = await query.get();
+  return snapshot.docs.map(doc => ({
+    id: doc.id,
+    email: doc.data().email,
+    createdAt: doc.data().createdAt,
+  }));
+}
+
+// Search users by email
+export async function adminSearchUsersByEmail(searchTerm: string): Promise<Array<{ id: string; email: string; createdAt: FirebaseFirestore.Timestamp }>> {
+  const db = getAdminFirestore();
+  // Firestore doesn't support full-text search, so we use range queries
+  const snapshot = await db
+    .collection('users')
+    .where('email', '>=', searchTerm)
+    .where('email', '<=', searchTerm + '\uf8ff')
+    .limit(20)
+    .get();
+
+  return snapshot.docs.map(doc => ({
+    id: doc.id,
+    email: doc.data().email,
+    createdAt: doc.data().createdAt,
+  }));
+}
+
+// Get user details with wallet, orders, and readings
+export async function adminGetUserDetails(userId: string): Promise<{
+  user: { id: string; email: string; createdAt: FirebaseFirestore.Timestamp } | null;
+  wallet: AdminWallet | null;
+  orders: Array<AdminOrder & { id: string }>;
+  readings: Array<AdminReading & { id: string }>;
+}> {
+  const db = getAdminFirestore();
+
+  // Get user
+  const userDoc = await db.collection('users').doc(userId).get();
+  const user = userDoc.exists ? {
+    id: userDoc.id,
+    email: userDoc.data()!.email,
+    createdAt: userDoc.data()!.createdAt,
+  } : null;
+
+  // Get wallet
+  const walletDoc = await db.collection('wallets').doc(userId).get();
+  const wallet = walletDoc.exists ? walletDoc.data() as AdminWallet : null;
+
+  // Get orders
+  const ordersSnapshot = await db
+    .collection('orders')
+    .where('userId', '==', userId)
+    .orderBy('createdAt', 'desc')
+    .limit(20)
+    .get();
+  const orders = ordersSnapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data() as AdminOrder,
+  }));
+
+  // Get readings
+  const readingsSnapshot = await db
+    .collection('readings')
+    .where('userId', '==', userId)
+    .orderBy('createdAt', 'desc')
+    .limit(20)
+    .get();
+  const readings = readingsSnapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data() as AdminReading,
+  }));
+
+  return { user, wallet, orders, readings };
+}
+
+// Adjust user balance (with audit logging)
+export async function adminAdjustBalance(
+  adminId: string,
+  adminEmail: string,
+  targetUserId: string,
+  action: 'add' | 'subtract' | 'set',
+  amount: number,
+  note?: string
+): Promise<{ success: boolean; newBalance?: number; error?: string }> {
+  const db = getAdminFirestore();
+
+  try {
+    // Get target user email
+    const userDoc = await db.collection('users').doc(targetUserId).get();
+    if (!userDoc.exists) {
+      return { success: false, error: 'User not found' };
+    }
+    const targetUserEmail = userDoc.data()!.email;
+
+    // Get current wallet
+    const walletRef = db.collection('wallets').doc(targetUserId);
+    const walletDoc = await walletRef.get();
+    const currentBalance = walletDoc.exists ? (walletDoc.data() as AdminWallet).balance : 0;
+
+    // Calculate new balance
+    let newBalance: number;
+    let actionString: string;
+
+    if (action === 'add') {
+      newBalance = currentBalance + amount;
+      actionString = `+${amount}`;
+    } else if (action === 'subtract') {
+      newBalance = Math.max(0, currentBalance - amount);
+      actionString = `-${amount}`;
+    } else if (action === 'set') {
+      newBalance = amount;
+      actionString = `set=${amount}`;
+    } else {
+      return { success: false, error: 'Invalid action' };
+    }
+
+    // Update wallet
+    await walletRef.set({
+      balance: newBalance,
+      updatedAt: FieldValue.serverTimestamp(),
+    }, { merge: true });
+
+    // Create audit log
+    await db.collection('admin_logs').add({
+      adminId,
+      adminEmail,
+      targetUserId,
+      targetUserEmail,
+      action: actionString,
+      prevBalance: currentBalance,
+      newBalance,
+      note: note || '',
+      createdAt: FieldValue.serverTimestamp(),
+    });
+
+    return { success: true, newBalance };
+  } catch (error: any) {
+    console.error('Error adjusting balance:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+// Get admin logs
+export async function adminGetLogs(limit: number = 50): Promise<Array<AdminLog & { id: string }>> {
+  const db = getAdminFirestore();
+  const snapshot = await db
+    .collection('admin_logs')
+    .orderBy('createdAt', 'desc')
+    .limit(limit)
+    .get();
+
+  return snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data() as AdminLog,
+  }));
+}
+
+// Get stats for admin overview
+export async function adminGetStats(): Promise<{
+  totalUsers: number;
+  totalOrders: number;
+  totalReadings: number;
+  totalBalance: number;
+  recentOrders: Array<AdminOrder & { id: string; userEmail: string }>;
+}> {
+  const db = getAdminFirestore();
+
+  // Count users
+  const usersSnapshot = await db.collection('users').count().get();
+  const totalUsers = usersSnapshot.data().count;
+
+  // Count orders
+  const ordersSnapshot = await db.collection('orders').count().get();
+  const totalOrders = ordersSnapshot.data().count;
+
+  // Count readings
+  const readingsSnapshot = await db.collection('readings').count().get();
+  const totalReadings = readingsSnapshot.data().count;
+
+  // Calculate total balance (sum of all wallets)
+  const walletsSnapshot = await db.collection('wallets').get();
+  let totalBalance = 0;
+  walletsSnapshot.docs.forEach(doc => {
+    totalBalance += (doc.data() as AdminWallet).balance;
+  });
+
+  // Get recent orders with user emails
+  const recentOrdersSnapshot = await db
+    .collection('orders')
+    .orderBy('createdAt', 'desc')
+    .limit(10)
+    .get();
+
+  const recentOrders = await Promise.all(
+    recentOrdersSnapshot.docs.map(async (doc) => {
+      const orderData = doc.data() as AdminOrder;
+      const userDoc = await db.collection('users').doc(orderData.userId).get();
+      const userEmail = userDoc.exists ? userDoc.data()!.email : 'Unknown';
+
+      return {
+        id: doc.id,
+        ...orderData,
+        userEmail,
+      };
+    })
+  );
+
+  return {
+    totalUsers,
+    totalOrders,
+    totalReadings,
+    totalBalance,
+    recentOrders,
+  };
 }
