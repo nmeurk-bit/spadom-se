@@ -66,12 +66,31 @@ export default function LoginPage() {
         handleCodeInApp: true,
       };
 
+      console.log('[Login] Sending sign-in link to:', email);
+      console.log('[Login] Action code settings:', actionCodeSettings);
+
       await sendSignInLinkToEmail(getFirebaseAuth(), email, actionCodeSettings);
       localStorage.setItem('emailForSignIn', email);
       setSent(true);
+      console.log('[Login] Sign-in link sent successfully');
     } catch (err: any) {
-      setError('Kunde inte skicka inloggningslänk. Försök igen.');
-      console.error('Send link error:', err);
+      console.error('[Login] Send link error:', err);
+      console.error('[Login] Error code:', err.code);
+      console.error('[Login] Error message:', err.message);
+
+      let errorMessage = 'Kunde inte skicka inloggningslänk.';
+
+      if (err.code === 'auth/unauthorized-continue-uri') {
+        errorMessage = 'Domänen är inte godkänd i Firebase. Kontakta administratören.';
+      } else if (err.code === 'auth/invalid-email') {
+        errorMessage = 'Ogiltig e-postadress.';
+      } else if (err.code === 'auth/missing-continue-uri') {
+        errorMessage = 'Konfigurationsfel. Kontakta administratören.';
+      } else if (err.message) {
+        errorMessage = `Fel: ${err.message}`;
+      }
+
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
