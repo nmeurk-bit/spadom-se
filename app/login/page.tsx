@@ -80,7 +80,9 @@ export default function LoginPage() {
 
       let errorMessage = 'Kunde inte skicka inloggningslänk.';
 
-      if (err.code === 'auth/unauthorized-continue-uri') {
+      if (err.code === 'auth/quota-exceeded') {
+        errorMessage = 'Firebase har nått sin dagliga gräns för inloggningslänkar. Försök igen om några timmar eller kontakta support@spadom.se.';
+      } else if (err.code === 'auth/unauthorized-continue-uri') {
         errorMessage = 'Domänen är inte godkänd i Firebase. Kontakta administratören.';
       } else if (err.code === 'auth/invalid-email') {
         errorMessage = 'Ogiltig e-postadress.';
