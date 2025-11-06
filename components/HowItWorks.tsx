@@ -36,7 +36,7 @@ export default function HowItWorks() {
       iconSrc: '/ikon-vand.png',
       iconAlt: 'Ikon för att vända kortet',
       title: 'Vänd kortet',
-      description: 'Du får ett digitalt spåkort. Klicka eller tryck för att vända det – svaret visas med ett poetiskt AI-budskap.',
+      description: 'Du får ett digitalt spåkort. Klicka eller tryck för att vända det – svaret visas med ett poetiskt budskap.',
     },
     {
       iconSrc: '/ikon-historik.png',

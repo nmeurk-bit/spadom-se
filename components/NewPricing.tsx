@@ -177,7 +177,7 @@ export default function NewPricing() {
                     />
                   </svg>
                   <span className="text-gray-300 text-sm">
-                    AI-genererade personliga spådomar
+                    Personliga spådomar skapade för dig
                   </span>
                 </li>
                 <li className="flex items-start gap-3">
