@@ -14,15 +14,15 @@ import CookieBanner from '@/components/CookieBanner';
 // });
 
 export const metadata: Metadata = {
-  title: 'Spådom.se - AI-driven andlig vägledning',
+  title: 'Spådommen.se - AI-driven andlig vägledning',
   description: 'Köp AI-genererade spådomar för underhållning och reflektion. Få svar på dina frågor om kärlek, karriär, ekonomi och mer.',
   keywords: ['spådom', 'tarot', 'AI', 'andlighet', 'vägledning', 'framtid'],
-  authors: [{ name: 'Spådom.se' }],
+  authors: [{ name: 'Spådommen.se' }],
   openGraph: {
-    title: 'Spådom.se - AI-driven andlig vägledning',
+    title: 'Spådommen.se - AI-driven andlig vägledning',
     description: 'Köp AI-genererade spådomar för underhållning och reflektion.',
-    url: 'https://spadom.se',
-    siteName: 'Spådom.se',
+    url: 'https://www.xn--spdommen-b0a.se',
+    siteName: 'Spådommen.se',
     locale: 'sv_SE',
     type: 'website',
   },
