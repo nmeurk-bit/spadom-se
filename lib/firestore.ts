@@ -40,8 +40,9 @@ export interface Order {
 
 export interface Reading {
   userId: string;
+  personName: string;
   question: string;
-  category: 'love' | 'career' | 'finance' | 'general';
+  category: 'love' | 'finance' | 'self_development' | 'spirituality' | 'future' | 'other';
   birthdate?: string;
   status: 'received' | 'processing' | 'completed';
   createdAt: Timestamp;
