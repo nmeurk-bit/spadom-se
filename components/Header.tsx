@@ -9,10 +9,29 @@ import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 export default function Header() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(getFirebaseAuth(), (currentUser) => {
+    const unsubscribe = onAuthStateChanged(getFirebaseAuth(), async (currentUser) => {
       setUser(currentUser);
+
+      if (currentUser) {
+        // Check if user is admin
+        try {
+          const token = await currentUser.getIdToken();
+          const response = await fetch('/api/admin/check', {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const data = await response.json();
+          setIsAdmin(data.isAdmin || false);
+        } catch (error) {
+          console.error('Admin check error:', error);
+          setIsAdmin(false);
+        }
+      } else {
+        setIsAdmin(false);
+      }
+
       setLoading(false);
     });
 
@@ -51,12 +70,21 @@ export default function Header() {
               <>
                 {user ? (
                   <>
-                    <Link 
-                      href="/konto" 
+                    <Link
+                      href="/konto"
                       className="text-gray-700 dark:text-gray-300 hover:text-mystical-purple transition-colors"
                     >
                       Konto
                     </Link>
+                    {isAdmin && (
+                      <Link
+                        href="/admin"
+                        className="text-mystical-gold hover:text-mystical-purple transition-colors font-semibold"
+                        aria-label="Admin-panel"
+                      >
+                        Admin
+                      </Link>
+                    )}
                     <button
                       onClick={handleLogout}
                       className="text-gray-700 dark:text-gray-300 hover:text-mystical-purple transition-colors"
@@ -66,8 +94,8 @@ export default function Header() {
                     </button>
                   </>
                 ) : (
-                  <Link 
-                    href="/login" 
+                  <Link
+                    href="/login"
                     className="bg-mystical-purple text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition-colors"
                   >
                     Logga in
