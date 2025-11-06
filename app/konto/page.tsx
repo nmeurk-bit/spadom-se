@@ -27,19 +27,30 @@ export default function KontoPage() {
 
       try {
         // Hämta eller skapa wallet
+        console.log('Fetching wallet for user:', user.uid);
         const wallet = await getOrCreateWallet(user.uid);
+        console.log('Wallet loaded:', wallet);
         setBalance(wallet.balance);
 
         // Hämta orders
+        console.log('Fetching orders for user:', user.uid);
         const userOrders = await listOrdersForUser(user.uid);
+        console.log('Orders loaded:', userOrders.length);
         setOrders(userOrders);
 
         // Hämta readings
+        console.log('Fetching readings for user:', user.uid);
         const userReadings = await listReadingsForUser(user.uid);
+        console.log('Readings loaded:', userReadings.length);
         setReadings(userReadings);
       } catch (err: any) {
+        console.error('Load error details:', {
+          message: err.message,
+          code: err.code,
+          stack: err.stack,
+          fullError: err
+        });
         setError('Kunde inte ladda kontoinformation. Försök igen eller kontakta support om problemet kvarstår.');
-        console.error('Load error:', err);
       } finally {
         setLoading(false);
       }
