@@ -32,6 +32,9 @@ export default function AdminPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [searchEmail, setSearchEmail] = useState('');
+  const [syncing, setSyncing] = useState(false);
+  const [syncResult, setSyncResult] = useState<string | null>(null);
+  const [userToken, setUserToken] = useState<string>('');
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(getFirebaseAuth(), async (user) => {
@@ -43,6 +46,8 @@ export default function AdminPage() {
       try {
         // Check if user is admin
         const token = await user.getIdToken();
+        setUserToken(token);
+
         const checkResponse = await fetch('/api/admin/check', {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -81,6 +86,44 @@ export default function AdminPage() {
     e.preventDefault();
     if (searchEmail.trim()) {
       router.push(`/admin/kunder?search=${encodeURIComponent(searchEmail.trim())}`);
+    }
+  };
+
+  const handleSyncUsers = async () => {
+    if (!confirm('Detta kommer att synka alla användare från Firebase Authentication till Firestore. Fortsätt?')) {
+      return;
+    }
+
+    setSyncing(true);
+    setSyncResult(null);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/admin/sync-users', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${userToken}` },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to sync users');
+      }
+
+      const data = await response.json();
+      setSyncResult(`Synkade ${data.syncedCount} av ${data.totalUsers} användare. ${data.errorCount > 0 ? `${data.errorCount} fel.` : ''}`);
+
+      // Reload stats after sync
+      const statsResponse = await fetch('/api/admin/stats', {
+        headers: { Authorization: `Bearer ${userToken}` },
+      });
+
+      if (statsResponse.ok) {
+        const statsData = await statsResponse.json();
+        setStats(statsData);
+      }
+    } catch (err: any) {
+      setError('Kunde inte synka användare: ' + err.message);
+    } finally {
+      setSyncing(false);
     }
   };
 
@@ -174,6 +217,29 @@ export default function AdminPage() {
             Sök
           </button>
         </form>
+      </div>
+
+      {/* Sync Users */}
+      <div className="mb-8 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+          Synka användare från Firebase Auth
+        </h2>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+          Synkar alla användare från Firebase Authentication till Firestore så de visas i kundlistan.
+          Detta behöver bara göras en gång för att få med användare som loggat in innan systemet uppdaterades.
+        </p>
+        <button
+          onClick={handleSyncUsers}
+          disabled={syncing}
+          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {syncing ? 'Synkar...' : 'Synka användare'}
+        </button>
+        {syncResult && (
+          <div className="mt-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+            <p className="text-green-800 dark:text-green-200">{syncResult}</p>
+          </div>
+        )}
       </div>
 
       {/* Stats Grid */}

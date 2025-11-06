@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { getFirebaseAuth } from '@/lib/firebase';
 import { sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink } from 'firebase/auth';
+import { ensureUserByEmail } from '@/lib/firestore';
 import ErrorBanner from '@/components/ErrorBanner';
 
 export default function LoginPage() {
@@ -23,7 +24,7 @@ export default function LoginPage() {
 
   const handleSignInWithLink = async () => {
     let emailForSignIn = localStorage.getItem('emailForSignIn');
-    
+
     if (!emailForSignIn) {
       emailForSignIn = window.prompt('Vänligen ange din e-postadress för bekräftelse');
     }
@@ -35,6 +36,11 @@ export default function LoginPage() {
 
     try {
       await signInWithEmailLink(getFirebaseAuth(), emailForSignIn, window.location.href);
+
+      // Säkerställ att användaren finns i Firestore (skapar om inte finns)
+      console.log('[Login] Creating/ensuring user in Firestore:', emailForSignIn);
+      await ensureUserByEmail(emailForSignIn);
+
       localStorage.removeItem('emailForSignIn');
       router.push('/konto');
     } catch (err: any) {
