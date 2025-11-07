@@ -51,15 +51,17 @@ export async function POST(request: NextRequest) {
     });
 
     if (!result.success) {
+      console.error('createReadingAtomic failed:', result.error);
+
       if (result.error === 'insufficient_balance') {
         return NextResponse.json(
           { error: 'insufficient_balance' },
           { status: 400 }
         );
       }
-      
+
       return NextResponse.json(
-        { error: 'Kunde inte skapa beställning. Försök igen.' },
+        { error: result.error || 'Kunde inte skapa beställning. Försök igen.' },
         { status: 500 }
       );
     }
