@@ -20,6 +20,8 @@ export default function KontoPage() {
   const [purchaseLoading, setPurchaseLoading] = useState<number | null>(null);
   const [selectedReading, setSelectedReading] = useState<(Reading & { id: string }) | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [showAllReadings, setShowAllReadings] = useState(false);
+  const [deletingReadingId, setDeletingReadingId] = useState<string | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(getFirebaseAuth(), async (user) => {
@@ -118,6 +120,46 @@ export default function KontoPage() {
     return labels[status] || status;
   };
 
+  const handleDeleteReading = async (readingId: string, event: React.MouseEvent) => {
+    event.stopPropagation(); // Förhindra att kortet öppnas
+
+    if (!confirm('Är du säker på att du vill radera denna spådom?')) {
+      return;
+    }
+
+    setDeletingReadingId(readingId);
+    setError(null);
+
+    try {
+      const user = getFirebaseAuth().currentUser;
+      if (!user) {
+        setError('Du måste vara inloggad');
+        return;
+      }
+
+      const token = await user.getIdToken();
+      const response = await fetch(`/api/readings/${readingId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Kunde inte radera spådomen');
+      }
+
+      // Ta bort från lokala state
+      setReadings(prev => prev.filter(r => r.id !== readingId));
+    } catch (err: any) {
+      console.error('Delete error:', err);
+      setError(err.message);
+    } finally {
+      setDeletingReadingId(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 pt-20 sm:pt-24 pb-16">
@@ -192,8 +234,9 @@ export default function KontoPage() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {readings.map((reading) => (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {(showAllReadings ? readings : readings.slice(0, 6)).map((reading) => (
               <div
                 key={reading.id}
                 onClick={() => setSelectedReading(reading)}
@@ -203,8 +246,24 @@ export default function KontoPage() {
                 <div className="absolute inset-0 bg-gradient-to-br from-mystical-gold/5 via-transparent to-mystical-purple/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
                 <div className="relative z-10">
+                  {/* Radera-knapp */}
+                  <button
+                    onClick={(e) => handleDeleteReading(reading.id, e)}
+                    disabled={deletingReadingId === reading.id}
+                    className="absolute top-0 right-0 p-2 text-gray-400 hover:text-red-400 transition-colors disabled:opacity-50"
+                    title="Radera spådom"
+                  >
+                    {deletingReadingId === reading.id ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-red-400 border-t-transparent"></div>
+                    ) : (
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    )}
+                  </button>
+
                   {/* Datum & Status */}
-                  <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center justify-between mb-3 pr-8">
                     <span className="text-xs text-gray-400">
                       {formatDate(reading.createdAt)}
                     </span>
@@ -254,6 +313,33 @@ export default function KontoPage() {
               </div>
             ))}
           </div>
+
+          {/* Visa fler/färre-knapp */}
+          {readings.length > 6 && (
+            <div className="mt-8 text-center">
+              <button
+                onClick={() => setShowAllReadings(!showAllReadings)}
+                className="px-8 py-3 bg-gradient-to-r from-mystical-purple/20 to-purple-900/20 border-2 border-mystical-purple/40 text-white rounded-xl hover:border-mystical-gold/50 hover:from-mystical-gold/10 hover:to-yellow-500/10 transition-all duration-300 font-semibold shadow-[0_0_20px_rgba(138,43,226,0.2)] hover:shadow-[0_0_30px_rgba(218,165,32,0.3)]"
+              >
+                {showAllReadings ? (
+                  <span className="flex items-center gap-2">
+                    Visa färre
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                    </svg>
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-2">
+                    Visa fler ({readings.length - 6} till)
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </span>
+                )}
+              </button>
+            </div>
+          )}
+        </>
         )}
       </section>
 
@@ -339,45 +425,66 @@ export default function KontoPage() {
 
       {/* Köphistorik */}
       <section>
-        <h2 className="text-2xl font-bold text-mystical-gold mb-4">
+        <h2 className="text-3xl font-bold text-mystical-gold mb-2">
           Köphistorik
         </h2>
+        <p className="text-gray-300 mb-8">
+          Här ser du alla dina tidigare köp.
+        </p>
         {orders.length === 0 ? (
-          <p className="text-gray-600 dark:text-gray-400">
-            Du har inga köp ännu.
-          </p>
+          <div className="bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 rounded-2xl p-12 text-center border-2 border-mystical-purple/30 shadow-[0_0_20px_rgba(138,43,226,0.2)]">
+            <div className="mb-4">
+              <svg className="w-16 h-16 mx-auto text-mystical-gold opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+            </div>
+            <p className="text-gray-300 text-lg mb-2">
+              Du har inga köp ännu.
+            </p>
+            <p className="text-gray-500 text-sm">
+              När du köper spådomar kommer de att visas här.
+            </p>
+          </div>
         ) : (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
-            <table className="w-full">
-              <thead className="bg-gray-50 dark:bg-gray-700">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Datum
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Antal
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Belopp
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                {orders.map((order) => (
-                  <tr key={order.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {orders.map((order) => (
+              <div
+                key={order.id}
+                className="relative bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 rounded-xl p-6 border-2 border-mystical-purple/30 shadow-[0_0_15px_rgba(138,43,226,0.15)] overflow-hidden"
+              >
+                {/* Bakgrundseffekt */}
+                <div className="absolute inset-0 bg-gradient-to-br from-mystical-gold/5 via-transparent to-mystical-purple/5 opacity-50"></div>
+
+                <div className="relative z-10">
+                  {/* Datum */}
+                  <div className="mb-4">
+                    <span className="text-xs text-gray-400 uppercase tracking-wider">Datum</span>
+                    <p className="text-white font-semibold mt-1">
                       {formatDate(order.createdAt)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      {order.quantity} spådomar
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                    </p>
+                  </div>
+
+                  {/* Antal */}
+                  <div className="mb-4">
+                    <span className="text-xs text-gray-400 uppercase tracking-wider">Antal spådomar</span>
+                    <p className="text-mystical-gold text-2xl font-bold mt-1">
+                      {order.quantity}
+                    </p>
+                  </div>
+
+                  {/* Belopp */}
+                  <div className="pt-4 border-t border-gray-700/50">
+                    <span className="text-xs text-gray-400 uppercase tracking-wider">Belopp</span>
+                    <p className="text-white text-xl font-semibold mt-1">
                       {(order.amount / 100).toFixed(2)} kr
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    </p>
+                  </div>
+                </div>
+
+                {/* Glödande effekt */}
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-mystical-purple/5 to-transparent"></div>
+              </div>
+            ))}
           </div>
         )}
       </section>
