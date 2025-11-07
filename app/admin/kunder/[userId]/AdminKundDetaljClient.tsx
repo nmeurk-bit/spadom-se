@@ -37,8 +37,6 @@ interface AdminKundDetaljClientProps {
 }
 
 export default function AdminKundDetaljClient({ userId }: AdminKundDetaljClientProps) {
-  console.log('[RENDER] AdminKundDetaljClient rendering with userId:', userId);
-
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -54,13 +52,8 @@ export default function AdminKundDetaljClient({ userId }: AdminKundDetaljClientP
   const [showAdjustForm, setShowAdjustForm] = useState(false);
 
   useEffect(() => {
-    console.log('[EFFECT] AdminKundDetaljClient mounted with userId:', userId);
-
     const unsubscribe = onAuthStateChanged(getFirebaseAuth(), async (user) => {
-      console.log('Auth state changed, user:', user?.email);
-
       if (!user) {
-        console.log('No user, redirecting to login');
         router.push('/login');
         return;
       }
@@ -70,16 +63,12 @@ export default function AdminKundDetaljClient({ userId }: AdminKundDetaljClientP
         const token = await user.getIdToken();
         setUserToken(token);
 
-        console.log('Checking admin status...');
         const checkResponse = await fetch('/api/admin/check', {
           headers: { Authorization: `Bearer ${token}` },
         });
         const checkData = await checkResponse.json();
 
-        console.log('Admin check result:', checkData);
-
         if (!checkData.isAdmin) {
-          console.log('Not admin, redirecting to konto');
           router.push('/konto');
           return;
         }
@@ -87,7 +76,6 @@ export default function AdminKundDetaljClient({ userId }: AdminKundDetaljClientP
         setIsAdmin(true);
 
         // Load user details
-        console.log('Loading user details for userId:', userId);
         await loadUserDetails(token);
       } catch (err: any) {
         console.error('Admin load error:', err);
@@ -101,21 +89,16 @@ export default function AdminKundDetaljClient({ userId }: AdminKundDetaljClientP
   }, [router, userId]);
 
   const loadUserDetails = async (token: string) => {
-    console.log('loadUserDetails called for userId:', userId);
-
     try {
       const response = await fetch(`/api/admin/users/${userId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
-      console.log('API response status:', response.status);
 
       if (!response.ok) {
         throw new Error('Failed to fetch user details');
       }
 
       const data = await response.json();
-      console.log('User details loaded:', data);
       setDetails(data);
     } catch (err: any) {
       console.error('User details load error:', err);
@@ -226,38 +209,29 @@ export default function AdminKundDetaljClient({ userId }: AdminKundDetaljClientP
     return labels[status] || status;
   };
 
-  console.log('[RENDER STATE] loading:', loading, 'isAdmin:', isAdmin, 'hasDetails:', !!details);
-
   if (loading) {
-    console.log('[RENDER] Showing loading state');
     return (
-      <div className="max-w-7xl mx-auto px-4 py-16" style={{ backgroundColor: 'pink', minHeight: '500px' }}>
+      <div className="max-w-7xl mx-auto px-4 py-16">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-mystical-purple"></div>
           <p className="mt-4 text-gray-600 dark:text-gray-400">Laddar kunddetaljer...</p>
-          <p className="mt-2 text-sm text-gray-500">User ID: {userId}</p>
-          <p className="mt-2 text-sm text-white bg-black p-2">LOADING STATE - Du ska se denna rosa bakgrund</p>
         </div>
       </div>
     );
   }
 
   if (!isAdmin || !details) {
-    console.log('[RENDER] Showing error state - not admin or no details');
     return (
-      <div className="max-w-7xl mx-auto px-4 py-16" style={{ backgroundColor: 'yellow', minHeight: '500px' }}>
+      <div className="max-w-7xl mx-auto px-4 py-16">
         <div className="text-center">
-          <p className="text-red-600 text-2xl font-bold">Ingen åtkomst eller data kunde inte laddas</p>
-          <p className="mt-2 text-sm text-gray-500">User ID: {userId}</p>
-          <p className="mt-2 text-sm text-gray-500">Is Admin: {isAdmin ? 'Ja' : 'Nej'}</p>
-          <p className="mt-2 text-sm text-gray-500">Details: {details ? 'Loaded' : 'Null'}</p>
-          <p className="mt-2 text-sm bg-black text-white p-2">ERROR STATE - Du ska se denna gula bakgrund</p>
+          <p className="text-red-600 text-xl font-bold">Ingen åtkomst eller data kunde inte laddas</p>
+          {error && (
+            <p className="mt-4 text-gray-600 dark:text-gray-400">{error}</p>
+          )}
         </div>
       </div>
     );
   }
-
-  console.log('[RENDER] Showing main content');
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
