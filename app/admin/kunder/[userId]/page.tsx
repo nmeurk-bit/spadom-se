@@ -32,14 +32,20 @@ interface UserDetails {
   }>;
 }
 
-export default function AdminKundDetaljPage({ params }: { params: Promise<{ userId: string }> | { userId: string } }) {
+interface PageProps {
+  params: {
+    userId: string;
+  };
+}
+
+export default function AdminKundDetaljPage({ params }: PageProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [details, setDetails] = useState<UserDetails | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [userToken, setUserToken] = useState<string>('');
-  const [userId, setUserId] = useState<string>('');
+  const userId = params.userId;
 
   // Balance adjustment state
   const [adjusting, setAdjusting] = useState(false);
@@ -49,17 +55,11 @@ export default function AdminKundDetaljPage({ params }: { params: Promise<{ user
   const [showAdjustForm, setShowAdjustForm] = useState(false);
 
   useEffect(() => {
-    const initParams = async () => {
-      const resolvedParams = await Promise.resolve(params);
-      setUserId(resolvedParams.userId);
-    };
-    initParams();
-  }, [params]);
-
-  useEffect(() => {
-    if (!userId) return;
+    console.log('AdminKundDetaljPage mounted with userId:', userId);
 
     const unsubscribe = onAuthStateChanged(getFirebaseAuth(), async (user) => {
+      console.log('Auth state changed, user:', user?.email);
+
       if (!user) {
         console.log('No user, redirecting to login');
         router.push('/login');
@@ -71,12 +71,13 @@ export default function AdminKundDetaljPage({ params }: { params: Promise<{ user
         const token = await user.getIdToken();
         setUserToken(token);
 
+        console.log('Checking admin status...');
         const checkResponse = await fetch('/api/admin/check', {
           headers: { Authorization: `Bearer ${token}` },
         });
         const checkData = await checkResponse.json();
 
-        console.log('Is admin:', checkData.isAdmin);
+        console.log('Admin check result:', checkData);
 
         if (!checkData.isAdmin) {
           console.log('Not admin, redirecting to konto');
@@ -90,8 +91,8 @@ export default function AdminKundDetaljPage({ params }: { params: Promise<{ user
         console.log('Loading user details for userId:', userId);
         await loadUserDetails(token);
       } catch (err: any) {
-        setError('Kunde inte ladda kunddata');
         console.error('Admin load error:', err);
+        setError('Kunde inte ladda kunddata');
       } finally {
         setLoading(false);
       }
@@ -101,22 +102,25 @@ export default function AdminKundDetaljPage({ params }: { params: Promise<{ user
   }, [router, userId]);
 
   const loadUserDetails = async (token: string) => {
-    if (!userId) return;
+    console.log('loadUserDetails called for userId:', userId);
 
     try {
       const response = await fetch(`/api/admin/users/${userId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
+      console.log('API response status:', response.status);
+
       if (!response.ok) {
         throw new Error('Failed to fetch user details');
       }
 
       const data = await response.json();
+      console.log('User details loaded:', data);
       setDetails(data);
     } catch (err: any) {
-      setError('Kunde inte ladda användardetaljer');
       console.error('User details load error:', err);
+      setError('Kunde inte ladda användardetaljer');
     }
   };
 
@@ -229,13 +233,23 @@ export default function AdminKundDetaljPage({ params }: { params: Promise<{ user
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-mystical-purple"></div>
           <p className="mt-4 text-gray-600 dark:text-gray-400">Laddar kunddetaljer...</p>
+          <p className="mt-2 text-sm text-gray-500">User ID: {userId}</p>
         </div>
       </div>
     );
   }
 
   if (!isAdmin || !details) {
-    return null;
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-16">
+        <div className="text-center">
+          <p className="text-red-600">Ingen åtkomst eller data kunde inte laddas</p>
+          <p className="mt-2 text-sm text-gray-500">User ID: {userId}</p>
+          <p className="mt-2 text-sm text-gray-500">Is Admin: {isAdmin ? 'Ja' : 'Nej'}</p>
+          <p className="mt-2 text-sm text-gray-500">Details: {details ? 'Loaded' : 'Null'}</p>
+        </div>
+      </div>
+    );
   }
 
   return (
