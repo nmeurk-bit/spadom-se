@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, useMotionValue, useTransform } from 'framer-motion';
 import { getFirebaseAuth } from '@/lib/firebase';
 import Image from 'next/image';
@@ -11,6 +11,9 @@ export default function HeroTarotCard() {
   const [isMobile, setIsMobile] = useState(false);
   const [loading, setLoading] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+  // Använd ref för att permanent låsa flip-state
+  const hasFlipped = useRef(false);
 
   // Motion values för 3D tilt-effekt (endast desktop)
   const x = useMotionValue(0);
@@ -48,7 +51,7 @@ export default function HeroTarotCard() {
   }, []);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (isMobile || prefersReducedMotion) return;
+    if (isMobile || prefersReducedMotion || hasFlipped.current) return;
 
     const rect = e.currentTarget.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
@@ -59,13 +62,14 @@ export default function HeroTarotCard() {
   };
 
   const handleMouseLeave = () => {
-    if (isMobile || prefersReducedMotion) return;
+    if (isMobile || prefersReducedMotion || hasFlipped.current) return;
     x.set(0);
     y.set(0);
   };
 
   const handleFlip = () => {
-    if (!isFlipped) {
+    if (!hasFlipped.current) {
+      hasFlipped.current = true;
       setIsFlipped(true);
       setShowHint(false);
     }
@@ -112,7 +116,7 @@ export default function HeroTarotCard() {
   return (
     <div className="w-full max-w-sm mx-auto relative" style={{ perspective: '1200px' }}>
       {/* Hint för mobil */}
-      {isMobile && showHint && !isFlipped && (
+      {isMobile && showHint && !hasFlipped.current && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -127,26 +131,26 @@ export default function HeroTarotCard() {
       <motion.div
         className="relative w-full h-[500px]"
         style={
-          !isMobile && !prefersReducedMotion
+          !isMobile && !prefersReducedMotion && !hasFlipped.current
             ? {
                 transformStyle: 'preserve-3d',
                 rotateX,
                 rotateY,
-                cursor: isFlipped ? 'default' : 'pointer'
+                cursor: 'pointer'
               }
             : {
                 transformStyle: 'preserve-3d',
-                cursor: isFlipped ? 'default' : 'pointer'
+                cursor: hasFlipped.current ? 'default' : 'pointer'
               }
         }
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
-        onClick={!isFlipped ? handleFlip : undefined}
-        onKeyDown={!isFlipped ? handleKeyDown : undefined}
-        role={!isFlipped ? "button" : undefined}
-        tabIndex={!isFlipped ? 0 : undefined}
-        aria-label={isFlipped ? 'Tarotkort vänt - visa CTA' : 'Tarotkort - klicka för att vända'}
-        animate={{ rotateY: isFlipped ? 180 : 0 }}
+        onClick={!hasFlipped.current ? handleFlip : undefined}
+        onKeyDown={!hasFlipped.current ? handleKeyDown : undefined}
+        role={!hasFlipped.current ? "button" : undefined}
+        tabIndex={!hasFlipped.current ? 0 : undefined}
+        aria-label={hasFlipped.current ? 'Tarotkort vänt - visa CTA' : 'Tarotkort - klicka för att vända'}
+        animate={{ rotateY: hasFlipped.current ? 180 : 0 }}
         transition={
           prefersReducedMotion
             ? { duration: 0 }
