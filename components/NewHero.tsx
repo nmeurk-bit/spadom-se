@@ -19,7 +19,7 @@ export default function NewHero() {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-28 pb-20 px-4">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 sm:pt-28 pb-20 px-4">
       {/* Mörkare overlay för att lyfta innehållet */}
       <div className="absolute inset-0 bg-black/30 z-0" />
 
