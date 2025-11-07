@@ -8,6 +8,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { getWallet, listOrdersForUser, listReadingsForUser } from '@/lib/firestore';
 import type { Order, Reading } from '@/lib/firestore';
 import ErrorBanner from '@/components/ErrorBanner';
+import ReadingModal from '@/components/ReadingModal';
 
 export default function KontoPage() {
   const router = useRouter();
@@ -17,6 +18,8 @@ export default function KontoPage() {
   const [readings, setReadings] = useState<Array<Reading & { id: string }>>([]);
   const [error, setError] = useState<string | null>(null);
   const [purchaseLoading, setPurchaseLoading] = useState<number | null>(null);
+  const [selectedReading, setSelectedReading] = useState<(Reading & { id: string }) | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(getFirebaseAuth(), async (user) => {
@@ -24,6 +27,8 @@ export default function KontoPage() {
         router.push('/login');
         return;
       }
+
+      setUserId(user.uid);
 
       try {
         // Hämta wallet
@@ -49,6 +54,12 @@ export default function KontoPage() {
   }, [router]);
 
   const handlePurchase = async (quantity: 1 | 5 | 10) => {
+    // Säkerställ att användaren är inloggad
+    if (!userId) {
+      setError('Du behöver logga in för att köpa spådomar');
+      return;
+    }
+
     setPurchaseLoading(quantity);
     setError(null);
 
@@ -109,7 +120,7 @@ export default function KontoPage() {
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-16">
+      <div className="max-w-7xl mx-auto px-4 pt-24 pb-16">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-mystical-purple"></div>
           <p className="mt-4 text-gray-600 dark:text-gray-400">Laddar ditt konto...</p>
@@ -119,9 +130,9 @@ export default function KontoPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-16">
+    <div className="max-w-7xl mx-auto px-4 pt-24 pb-16">
       <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-8">
-        Ditt konto
+        Mitt Konto
       </h1>
 
       {error && <ErrorBanner message={error} onClose={() => setError(null)} />}
@@ -140,60 +151,41 @@ export default function KontoPage() {
       </div>
 
       {/* Beställ ny spådom knapp */}
-      <div className="mb-8">
+      <div className="mb-12">
         {balance > 0 ? (
           <button
             onClick={() => router.push('/bestallning')}
             className="w-full sm:w-auto bg-mystical-gold text-gray-900 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-opacity-90 transition-all shadow-md hover:shadow-lg"
           >
-            Beställ ny spådom
+            Beställ Ny Spådom
           </button>
         ) : (
           <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-6">
             <p className="text-yellow-800 dark:text-yellow-200 mb-4">
-              Du har inga spådomar kvar. Köp fler för att fortsätta.
+              Du har inga spådomar kvar. Köp ett paket nedan för att fortsätta.
             </p>
           </div>
         )}
       </div>
 
-      {/* Köp mer-knappar */}
+      {/* Mina spådomar sektion */}
       <section className="mb-12">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-          Köp fler spådomar
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+          Mina Spådomar
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {[
-            { quantity: 1 as const, name: '1 spådom', price: '20 kr' },
-            { quantity: 5 as const, name: '5 spådomar', price: '60 kr' },
-            { quantity: 10 as const, name: '10 spådomar', price: '100 kr' },
-          ].map((tier) => (
-            <button
-              key={tier.quantity}
-              onClick={() => handlePurchase(tier.quantity)}
-              disabled={purchaseLoading !== null}
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow disabled:opacity-50 disabled:cursor-not-allowed text-left"
-            >
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                {tier.name}
-              </h3>
-              <p className="text-2xl font-bold text-mystical-purple">
-                {tier.price}
-              </p>
-            </button>
-          ))}
-        </div>
-      </section>
+        <p className="text-gray-600 dark:text-gray-400 mb-6">
+          Klicka på en tidigare spådom för att öppna och läsa den.
+        </p>
 
-      {/* Senaste beställningarna */}
-      <section className="mb-12">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-          Senaste beställningarna
-        </h2>
         {readings.length === 0 ? (
-          <p className="text-gray-600 dark:text-gray-400">
-            Du har inga beställningar ännu.
-          </p>
+          <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-8 text-center">
+            <p className="text-gray-600 dark:text-gray-400 text-lg mb-4">
+              Du har inga spådomar ännu.
+            </p>
+            <p className="text-gray-500 dark:text-gray-500 text-sm">
+              Köp ett paket nedan för att börja.
+            </p>
+          </div>
         ) : (
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
             <table className="w-full">
@@ -218,7 +210,11 @@ export default function KontoPage() {
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                 {readings.map((reading) => (
-                  <tr key={reading.id}>
+                  <tr
+                    key={reading.id}
+                    onClick={() => setSelectedReading(reading)}
+                    className="hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
+                  >
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                       {formatDate(reading.createdAt)}
                     </td>
@@ -252,6 +248,46 @@ export default function KontoPage() {
             </table>
           </div>
         )}
+      </section>
+
+      {/* Köp fler spådomar sektion */}
+      <section className="mb-12">
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+          Köp Fler Spådomar
+        </h2>
+        <p className="text-gray-600 dark:text-gray-400 mb-6">
+          Välj ett paket och få dina spådomar direkt.
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {[
+            { quantity: 1 as const, name: 'Köp 1 Spådom', price: '20 kr', desc: 'Perfekt för att testa' },
+            { quantity: 5 as const, name: 'Köp 5 Spådomar', price: '60 kr', desc: 'Bästa värdet' },
+            { quantity: 10 as const, name: 'Köp 10 Spådomar', price: '100 kr', desc: 'Mest populära' },
+          ].map((tier) => (
+            <button
+              key={tier.quantity}
+              onClick={() => handlePurchase(tier.quantity)}
+              disabled={purchaseLoading !== null}
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed text-left border-2 border-transparent hover:border-mystical-purple"
+            >
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+                {tier.name}
+              </h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                {tier.desc}
+              </p>
+              <p className="text-2xl font-bold text-mystical-purple">
+                {tier.price}
+              </p>
+              {purchaseLoading === tier.quantity && (
+                <div className="mt-3 text-sm text-gray-500 dark:text-gray-400">
+                  Omdirigerar till betalning...
+                </div>
+              )}
+            </button>
+          ))}
+        </div>
       </section>
 
       {/* Köphistorik */}
@@ -298,6 +334,14 @@ export default function KontoPage() {
           </div>
         )}
       </section>
+
+      {/* Reading Modal */}
+      {selectedReading && (
+        <ReadingModal
+          reading={selectedReading}
+          onClose={() => setSelectedReading(null)}
+        />
+      )}
     </div>
   );
 }
