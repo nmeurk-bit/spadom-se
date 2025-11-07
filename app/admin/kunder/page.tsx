@@ -23,6 +23,11 @@ function AdminKunderContent() {
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
   const [userToken, setUserToken] = useState<string>('');
 
+  const handleViewCustomer = (userId: string) => {
+    console.log('Navigating to customer:', userId);
+    router.push(`/admin/kunder/${userId}`);
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(getFirebaseAuth(), async (user) => {
       if (!user) {
@@ -246,12 +251,12 @@ function AdminKunderContent() {
                       {formatDate(user.createdAt)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <Link
-                        href={`/admin/kunder/${user.id}`}
-                        className="text-mystical-purple hover:text-mystical-gold transition-colors font-medium"
+                      <button
+                        onClick={() => handleViewCustomer(user.id)}
+                        className="text-mystical-purple hover:text-mystical-gold transition-colors font-medium cursor-pointer"
                       >
                         Visa detaljer →
-                      </Link>
+                      </button>
                     </td>
                   </tr>
                 ))}
