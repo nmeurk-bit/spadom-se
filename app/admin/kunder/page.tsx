@@ -23,10 +23,6 @@ function AdminKunderContent() {
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
   const [userToken, setUserToken] = useState<string>('');
 
-  const handleViewCustomer = (userId: string) => {
-    console.log('[ADMIN/LIST] Navigating to customer:', userId, 'URL:', `/admin/kunder/${userId}`);
-    router.push(`/admin/kunder/${userId}`);
-  };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(getFirebaseAuth(), async (user) => {
@@ -253,8 +249,6 @@ function AdminKunderContent() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <Link
                         href={`/admin/kunder/${user.id}`}
-                        prefetch={false}
-                        onClick={() => console.log('[ADMIN/LIST] Link clicked for userId:', user.id)}
                         className="text-mystical-purple hover:text-mystical-gold transition-colors font-medium"
                       >
                         Visa detaljer →
