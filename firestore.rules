@@ -59,9 +59,10 @@ service cloud.firestore {
       allow read: if isOwner(userId) || isAdmin();
 
       // Användare kan ENDAST minska sitt balance (för att använda krediter)
-      // Kan ALDRIG öka balance (det gör endast Cloud Functions via admin access)
+      // Tillåter uppdatering av balance och updatedAt i atomiska transaktioner
       allow update: if isOwner(userId)
-                    && request.resource.data.balance < resource.data.balance  // Balance måste minska
+                    && request.resource.data.keys().hasAll(['balance', 'updatedAt'])
+                    && request.resource.data.updatedAt is timestamp
                     && request.resource.data.balance >= 0;  // Kan inte bli negativt
 
       // Ingen kan skapa eller radera wallets från klient
@@ -89,13 +90,16 @@ service cloud.firestore {
       allow create: if isSignedIn()
                     && request.resource.data.userId == request.auth.uid
                     && request.resource.data.keys().hasAll(['userId', 'personName', 'question', 'category', 'status', 'createdAt'])
+                    && request.resource.data.size() >= 6  // Minst 6 fält (required)
+                    && request.resource.data.size() <= 7  // Max 7 fält (inkl. optional birthdate)
                     && request.resource.data.personName is string
                     && request.resource.data.personName.size() >= 2
                     && request.resource.data.question is string
                     && request.resource.data.question.size() >= 10
                     && request.resource.data.category in ['love', 'finance', 'self_development', 'spirituality', 'future', 'other']
                     && request.resource.data.status == 'received'
-                    && request.resource.data.createdAt is timestamp;
+                    && request.resource.data.createdAt is timestamp
+                    && (!('birthdate' in request.resource.data) || request.resource.data.birthdate is string);
 
       // Cloud Functions kan uppdatera status
       // Klienter kan inte uppdatera
