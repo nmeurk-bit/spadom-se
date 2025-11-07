@@ -69,7 +69,7 @@ export default function KontoPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ quantity }),
+        body: JSON.stringify({ quantity, userId }),
       });
 
       const data = await response.json();
@@ -150,14 +150,14 @@ export default function KontoPage() {
         </div>
       </div>
 
-      {/* Beställ ny spådom knapp */}
+      {/* Öppna en spådom knapp */}
       <div className="mb-12">
         {balance > 0 ? (
           <button
             onClick={() => router.push('/bestallning')}
             className="w-full sm:w-auto bg-mystical-gold text-gray-900 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-opacity-90 transition-all shadow-md hover:shadow-lg"
           >
-            Beställ Ny Spådom
+            Öppna en spådom
           </button>
         ) : (
           <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-6">
@@ -170,10 +170,10 @@ export default function KontoPage() {
 
       {/* Mina spådomar sektion */}
       <section className="mb-12">
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+        <h2 className="text-3xl font-bold text-mystical-gold mb-2">
           Mina Spådomar
         </h2>
-        <p className="text-gray-600 dark:text-gray-400 mb-6">
+        <p className="text-gray-300 mb-6">
           Klicka på en tidigare spådom för att öppna och läsa den.
         </p>
 
@@ -252,10 +252,10 @@ export default function KontoPage() {
 
       {/* Köp fler spådomar sektion */}
       <section className="mb-12">
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+        <h2 className="text-3xl font-bold text-mystical-gold mb-2">
           Köp Fler Spådomar
         </h2>
-        <p className="text-gray-600 dark:text-gray-400 mb-6">
+        <p className="text-gray-300 mb-6">
           Välj ett paket och få dina spådomar direkt.
         </p>
 
@@ -292,7 +292,7 @@ export default function KontoPage() {
 
       {/* Köphistorik */}
       <section>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+        <h2 className="text-2xl font-bold text-mystical-gold mb-4">
           Köphistorik
         </h2>
         {orders.length === 0 ? (
