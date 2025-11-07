@@ -1,6 +1,6 @@
 // app/api/bestallning/route.ts (Vercel-kompatibel version)
 import { NextRequest, NextResponse } from 'next/server';
-import { createReadingAtomic } from '@/lib/firestore';
+import { adminCreateReadingAtomic } from '@/lib/firestore-admin';
 
 export async function POST(request: NextRequest) {
   try {
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Skapa reading atomiskt (kontrollerar saldo och drar 1 kredit)
-    const result = await createReadingAtomic(userId, {
+    const result = await adminCreateReadingAtomic(userId, {
       personName: personName.trim(),
       question: question.trim(),
       category,
