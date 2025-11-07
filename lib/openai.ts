@@ -1,10 +1,17 @@
 // lib/openai.ts
 import OpenAI from 'openai';
 
-// Skapa OpenAI-klient
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Lazy initialize OpenAI client to avoid build-time errors
+let openai: OpenAI | null = null;
+
+function getOpenAIClient(): OpenAI {
+  if (!openai) {
+    openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY || '',
+    });
+  }
+  return openai;
+}
 
 // Kategori till svenska beskrivningar
 const categoryDescriptions = {
@@ -60,7 +67,8 @@ Fråga: "${question}"
 Dra tre relevanta tarotkort (Dåtid, Nutid, Framtid) och ge en djupgående tolkning som känns som en riktig tarotläsning.`;
 
   try {
-    const completion = await openai.chat.completions.create({
+    const client = getOpenAIClient();
+    const completion = await client.chat.completions.create({
       model: 'gpt-4-turbo-preview',
       messages: [
         { role: 'system', content: systemPrompt },

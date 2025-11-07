@@ -54,8 +54,6 @@ export async function POST(req: Request) {
         );
       }
 
-      // ALWAYS ensure user exists in users collection
-      // This prevents "Unknown" from appearing in admin panel
       if (!customerEmail) {
         console.error('No customer email found in session');
         return NextResponse.json(
@@ -64,14 +62,42 @@ export async function POST(req: Request) {
         );
       }
 
-      console.log('Ensuring user exists for email:', customerEmail);
-      // This will find existing user or create new one
-      const ensuredUserId = await adminEnsureUserByEmail(customerEmail);
+      console.log('Processing payment for email:', customerEmail);
+      console.log('Metadata userId:', userId);
 
-      // Use the ensured userId (ignore metadata userId if it doesn't match)
-      userId = ensuredUserId;
+      // If userId is provided in metadata, verify it exists and matches the email
+      // Otherwise, ensure user exists by email (for backward compatibility)
+      if (userId) {
+        // Verify the userId exists and matches the email
+        const { getAdminFirestore } = await import('@/lib/firebase-admin');
+        const db = getAdminFirestore();
+        const userDoc = await db.collection('users').doc(userId).get();
 
-      console.log('User ID:', userId);
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          const userEmail = userData?.email?.toLowerCase();
+          const customerEmailLower = customerEmail.toLowerCase();
+
+          if (userEmail === customerEmailLower) {
+            console.log('Using userId from metadata:', userId);
+            // userId is valid and matches email, use it
+          } else {
+            console.warn('userId from metadata does not match email. userId email:', userEmail, 'customer email:', customerEmailLower);
+            // Email mismatch - find user by email instead
+            userId = await adminEnsureUserByEmail(customerEmail);
+          }
+        } else {
+          console.warn('userId from metadata does not exist:', userId);
+          // userId doesn't exist - find user by email instead
+          userId = await adminEnsureUserByEmail(customerEmail);
+        }
+      } else {
+        console.log('No userId in metadata, ensuring user by email');
+        // No userId in metadata - find or create user by email
+        userId = await adminEnsureUserByEmail(customerEmail);
+      }
+
+      console.log('Final User ID:', userId);
 
       // Create order in Firestore
       const orderId = await adminCreateOrder({

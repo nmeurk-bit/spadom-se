@@ -52,7 +52,9 @@ export interface Reading {
 // Hämta användare baserat på email
 export async function getUserByEmail(email: string): Promise<{ id: string; data: User } | null> {
   const usersRef = collection(getDb(), 'users');
-  const q = query(usersRef, where('email', '==', email), limit(1));
+  // Normalize email to lowercase for case-insensitive matching
+  const normalizedEmail = email.toLowerCase();
+  const q = query(usersRef, where('email', '==', normalizedEmail), limit(1));
   const snapshot = await getDocs(q);
 
   if (snapshot.empty) {
@@ -69,7 +71,7 @@ export async function getUserByEmail(email: string): Promise<{ id: string; data:
 // Säkerställ att användare finns, skapa om inte
 export async function ensureUserByEmail(email: string): Promise<string> {
   const existingUser = await getUserByEmail(email);
-  
+
   if (existingUser) {
     return existingUser.id;
   }
@@ -78,8 +80,9 @@ export async function ensureUserByEmail(email: string): Promise<string> {
   const userRef = doc(collection(getDb(), 'users'));
   const userId = userRef.id;
 
+  // Normalize email to lowercase
   await setDoc(userRef, {
-    email,
+    email: email.toLowerCase(),
     createdAt: Timestamp.now(),
   });
 
