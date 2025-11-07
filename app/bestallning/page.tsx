@@ -257,7 +257,7 @@ export default function BestallningPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <p className="text-blue-200 text-sm">
-                Din beställning behandlas inom 24 timmar och du får svar i ditt konto.
+                Du får din spådom direkt här på sidan och den sparas automatiskt i ditt konto.
               </p>
             </div>
           </div>
