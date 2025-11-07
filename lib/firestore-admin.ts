@@ -25,8 +25,9 @@ export interface AdminUser {
 
 export interface AdminReading {
   userId: string;
+  personName: string;
   question: string;
-  category: 'love' | 'career' | 'finance' | 'general';
+  category: 'love' | 'finance' | 'self_development' | 'spirituality' | 'future' | 'other';
   birthdate?: string;
   status: 'received' | 'processing' | 'completed';
   createdAt: FirebaseFirestore.Timestamp;
@@ -376,4 +377,54 @@ export async function adminGetStats(): Promise<{
     totalBalance,
     recentOrders,
   };
+}
+
+// Create reading with atomic credit decrement (admin version)
+export async function adminCreateReadingAtomic(
+  userId: string,
+  readingData: Omit<AdminReading, 'userId' | 'status' | 'createdAt'>
+): Promise<{ success: boolean; readingId?: string; error?: string }> {
+  const db = getAdminFirestore();
+
+  try {
+    const result = await db.runTransaction(async (transaction) => {
+      const walletRef = db.collection('wallets').doc(userId);
+      const walletDoc = await transaction.get(walletRef);
+
+      if (!walletDoc.exists) {
+        throw new Error('Wallet not found');
+      }
+
+      const wallet = walletDoc.data() as AdminWallet;
+
+      if (wallet.balance < 1) {
+        throw new Error('Insufficient balance');
+      }
+
+      // Create reading
+      const readingRef = db.collection('readings').doc();
+      transaction.set(readingRef, {
+        userId,
+        ...readingData,
+        status: 'received',
+        createdAt: FieldValue.serverTimestamp(),
+      });
+
+      // Deduct 1 credit
+      transaction.update(walletRef, {
+        balance: FieldValue.increment(-1),
+        updatedAt: FieldValue.serverTimestamp(),
+      });
+
+      return readingRef.id;
+    });
+
+    return { success: true, readingId: result };
+  } catch (error: any) {
+    if (error.message === 'Insufficient balance') {
+      return { success: false, error: 'insufficient_balance' };
+    }
+    console.error('Error creating reading:', error);
+    return { success: false, error: 'unknown_error' };
+  }
 }
