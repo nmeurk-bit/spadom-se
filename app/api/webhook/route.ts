@@ -54,19 +54,22 @@ export async function POST(req: Request) {
         );
       }
 
-      // If userId is 'guest' or not provided, find/create user by email
-      if (!userId || userId === 'guest') {
-        if (!customerEmail) {
-          console.error('No customer email found in session');
-          return NextResponse.json(
-            { error: 'No customer email found' },
-            { status: 400 }
-          );
-        }
-
-        console.log('Finding/creating user for email:', customerEmail);
-        userId = await adminEnsureUserByEmail(customerEmail);
+      // ALWAYS ensure user exists in users collection
+      // This prevents "Unknown" from appearing in admin panel
+      if (!customerEmail) {
+        console.error('No customer email found in session');
+        return NextResponse.json(
+          { error: 'No customer email found' },
+          { status: 400 }
+        );
       }
+
+      console.log('Ensuring user exists for email:', customerEmail);
+      // This will find existing user or create new one
+      const ensuredUserId = await adminEnsureUserByEmail(customerEmail);
+
+      // Use the ensured userId (ignore metadata userId if it doesn't match)
+      userId = ensuredUserId;
 
       console.log('User ID:', userId);
 

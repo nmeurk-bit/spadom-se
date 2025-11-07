@@ -67,7 +67,7 @@ Dra tre relevanta tarotkort (Dåtid, Nutid, Framtid) och ge en djupgående tolkn
         { role: 'user', content: userPrompt },
       ],
       temperature: 0.8,
-      max_tokens: 500,
+      max_tokens: 1000,
     });
 
     const fortune = completion.choices[0]?.message?.content;
