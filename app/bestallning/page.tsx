@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { getFirebaseAuth } from '@/lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import ErrorBanner from '@/components/ErrorBanner';
+import FortuneCard from '@/components/FortuneCard';
 
 type Category = 'love' | 'finance' | 'self_development' | 'spirituality' | 'future' | 'other';
 
@@ -28,6 +29,13 @@ export default function BestallningPage() {
   const [personName, setPersonName] = useState('');
   const [question, setQuestion] = useState('');
   const [category, setCategory] = useState<Category>('other');
+
+  // State för att visa spådomskortet efter beställning
+  const [fortuneData, setFortuneData] = useState<{
+    fortune: string;
+    personName: string;
+    category: string;
+  } | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(getFirebaseAuth(), (user) => {
@@ -93,8 +101,13 @@ export default function BestallningPage() {
         return;
       }
 
-      // Framgång! Redirecta till tacksida
-      router.push('/tack?typ=bestallning');
+      // Framgång! Visa spådomskortet
+      setFortuneData({
+        fortune: data.fortune,
+        personName: personName.trim(),
+        category,
+      });
+      setSubmitting(false);
     } catch (err: any) {
       console.error('Beställningsfel:', err);
       setError('Kunde inte skapa beställning. Försök igen.');
@@ -110,6 +123,17 @@ export default function BestallningPage() {
           <p className="mt-4 text-gray-400">Laddar...</p>
         </div>
       </div>
+    );
+  }
+
+  // Visa spådomskortet om beställningen är klar
+  if (fortuneData) {
+    return (
+      <FortuneCard
+        fortune={fortuneData.fortune}
+        personName={fortuneData.personName}
+        category={fortuneData.category}
+      />
     );
   }
 

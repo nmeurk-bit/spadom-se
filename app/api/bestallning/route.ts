@@ -1,6 +1,7 @@
 // app/api/bestallning/route.ts (Vercel-kompatibel version)
 import { NextRequest, NextResponse } from 'next/server';
-import { adminCreateReadingAtomic } from '@/lib/firestore-admin';
+import { adminCreateReadingAtomic, adminUpdateReadingWithResponse } from '@/lib/firestore-admin';
+import { generateFortune } from '@/lib/openai';
 
 export async function POST(request: NextRequest) {
   try {
@@ -65,9 +66,41 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Generera spådomen direkt med AI
+    console.log('Genererar spådom för reading:', result.readingId);
+    let fortune: string;
+
+    try {
+      fortune = await generateFortune(
+        personName.trim(),
+        question.trim(),
+        category
+      );
+      console.log('Spådom genererad, längd:', fortune.length);
+    } catch (error: any) {
+      console.error('Kunde inte generera spådom:', error);
+      return NextResponse.json(
+        { error: 'Kunde inte generera spådom. Försök igen senare.' },
+        { status: 500 }
+      );
+    }
+
+    // Uppdatera reading med spådomen
+    const updateResult = await adminUpdateReadingWithResponse(result.readingId!, fortune);
+
+    if (!updateResult.success) {
+      console.error('Kunde inte uppdatera reading med spådom:', updateResult.error);
+      return NextResponse.json(
+        { error: 'Spådom genererad men kunde inte sparas. Kontakta support.' },
+        { status: 500 }
+      );
+    }
+
+    // Returnera spådomen till frontend
     return NextResponse.json({
       success: true,
       readingId: result.readingId,
+      fortune, // Den genererade spådomen
     });
   } catch (error: any) {
     console.error('Bestallning error:', error);
