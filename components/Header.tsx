@@ -10,6 +10,7 @@ export default function Header() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(getFirebaseAuth(), async (currentUser) => {
@@ -48,54 +49,139 @@ export default function Header() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-b from-gray-900/95 via-gray-900/90 to-transparent backdrop-blur-sm">
-      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="flex justify-end items-center gap-4">
-          {/* Köp-knapp */}
-          <Link
-            href="/#priser"
-            className="px-6 py-2 bg-gradient-to-r from-mystical-gold/10 to-yellow-500/10 border border-mystical-gold/30 text-mystical-gold rounded-lg hover:from-mystical-gold/20 hover:to-yellow-500/20 hover:border-mystical-gold/50 transition-all backdrop-blur-sm font-semibold"
-          >
-            Köp spådom
+      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+        <div className="flex justify-between items-center">
+          {/* Logo/Brand - visible on mobile */}
+          <Link href="/" className="text-mystical-gold font-bold text-lg sm:text-xl">
+            Spådom
           </Link>
 
-          {!loading && (
-            <>
-              {user ? (
-                <>
-                  <Link
-                    href="/konto"
-                    className="px-6 py-2 bg-white/5 border border-white/10 text-white rounded-lg hover:bg-white/10 hover:border-white/20 transition-all backdrop-blur-sm"
-                  >
-                    Mitt konto
-                  </Link>
-                  {isAdmin && (
+          {/* Desktop Menu */}
+          <div className="hidden md:flex items-center gap-3 lg:gap-4">
+            <Link
+              href="/#priser"
+              className="px-4 lg:px-6 py-2 bg-gradient-to-r from-mystical-gold/10 to-yellow-500/10 border border-mystical-gold/30 text-mystical-gold rounded-lg hover:from-mystical-gold/20 hover:to-yellow-500/20 hover:border-mystical-gold/50 transition-all backdrop-blur-sm font-semibold text-sm lg:text-base"
+            >
+              Köp spådom
+            </Link>
+
+            {!loading && (
+              <>
+                {user ? (
+                  <>
                     <Link
-                      href="/admin"
-                      className="px-6 py-2 bg-mystical-purple/20 border border-mystical-purple/40 text-mystical-gold rounded-lg hover:bg-mystical-purple/30 hover:border-mystical-purple/60 transition-all backdrop-blur-sm font-semibold"
-                      aria-label="Admin-panel"
+                      href="/konto"
+                      className="px-4 lg:px-6 py-2 bg-white/5 border border-white/10 text-white rounded-lg hover:bg-white/10 hover:border-white/20 transition-all backdrop-blur-sm text-sm lg:text-base"
                     >
-                      Admin
+                      Mitt konto
                     </Link>
-                  )}
-                  <button
-                    onClick={handleLogout}
-                    className="px-6 py-2 bg-white/5 border border-white/10 text-gray-300 rounded-lg hover:bg-red-900/20 hover:border-red-500/30 hover:text-red-300 transition-all backdrop-blur-sm"
-                    aria-label="Logga ut"
+                    {isAdmin && (
+                      <Link
+                        href="/admin"
+                        className="px-4 lg:px-6 py-2 bg-mystical-purple/20 border border-mystical-purple/40 text-mystical-gold rounded-lg hover:bg-mystical-purple/30 hover:border-mystical-purple/60 transition-all backdrop-blur-sm font-semibold text-sm lg:text-base"
+                        aria-label="Admin-panel"
+                      >
+                        Admin
+                      </Link>
+                    )}
+                    <button
+                      onClick={handleLogout}
+                      className="px-4 lg:px-6 py-2 bg-white/5 border border-white/10 text-gray-300 rounded-lg hover:bg-red-900/20 hover:border-red-500/30 hover:text-red-300 transition-all backdrop-blur-sm text-sm lg:text-base"
+                      aria-label="Logga ut"
+                    >
+                      Logga ut
+                    </button>
+                  </>
+                ) : (
+                  <Link
+                    href="/login"
+                    className="px-4 lg:px-6 py-2 bg-gradient-to-r from-mystical-purple to-purple-600 border border-mystical-purple/50 text-white rounded-lg hover:from-purple-600 hover:to-mystical-purple hover:border-mystical-gold/50 transition-all shadow-lg hover:shadow-mystical-purple/50 font-semibold text-sm lg:text-base"
                   >
-                    Logga ut
-                  </button>
-                </>
+                    Logga in
+                  </Link>
+                )}
+              </>
+            )}
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden p-2 text-white hover:text-mystical-gold transition-colors"
+            aria-label="Toggle menu"
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              {mobileMenuOpen ? (
+                <path d="M6 18L18 6M6 6l12 12" />
               ) : (
-                <Link
-                  href="/login"
-                  className="px-6 py-2 bg-gradient-to-r from-mystical-purple to-purple-600 border border-mystical-purple/50 text-white rounded-lg hover:from-purple-600 hover:to-mystical-purple hover:border-mystical-gold/50 transition-all shadow-lg hover:shadow-mystical-purple/50 font-semibold"
-                >
-                  Logga in
-                </Link>
+                <path d="M4 6h16M4 12h16M4 18h16" />
               )}
-            </>
-          )}
+            </svg>
+          </button>
         </div>
+
+        {/* Mobile Menu Dropdown */}
+        {mobileMenuOpen && (
+          <div className="md:hidden mt-4 pb-4 space-y-3 border-t border-white/10 pt-4">
+            <Link
+              href="/#priser"
+              className="block px-4 py-2 bg-gradient-to-r from-mystical-gold/10 to-yellow-500/10 border border-mystical-gold/30 text-mystical-gold rounded-lg hover:from-mystical-gold/20 hover:to-yellow-500/20 hover:border-mystical-gold/50 transition-all backdrop-blur-sm font-semibold text-center"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Köp spådom
+            </Link>
+
+            {!loading && (
+              <>
+                {user ? (
+                  <>
+                    <Link
+                      href="/konto"
+                      className="block px-4 py-2 bg-white/5 border border-white/10 text-white rounded-lg hover:bg-white/10 hover:border-white/20 transition-all backdrop-blur-sm text-center"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Mitt konto
+                    </Link>
+                    {isAdmin && (
+                      <Link
+                        href="/admin"
+                        className="block px-4 py-2 bg-mystical-purple/20 border border-mystical-purple/40 text-mystical-gold rounded-lg hover:bg-mystical-purple/30 hover:border-mystical-purple/60 transition-all backdrop-blur-sm font-semibold text-center"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        Admin
+                      </Link>
+                    )}
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setMobileMenuOpen(false);
+                      }}
+                      className="w-full px-4 py-2 bg-white/5 border border-white/10 text-gray-300 rounded-lg hover:bg-red-900/20 hover:border-red-500/30 hover:text-red-300 transition-all backdrop-blur-sm"
+                    >
+                      Logga ut
+                    </button>
+                  </>
+                ) : (
+                  <Link
+                    href="/login"
+                    className="block px-4 py-2 bg-gradient-to-r from-mystical-purple to-purple-600 border border-mystical-purple/50 text-white rounded-lg hover:from-purple-600 hover:to-mystical-purple hover:border-mystical-gold/50 transition-all shadow-lg hover:shadow-mystical-purple/50 font-semibold text-center"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Logga in
+                  </Link>
+                )}
+              </>
+            )}
+          </div>
+        )}
       </nav>
     </header>
   );

@@ -138,7 +138,7 @@ export default function BestallningPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900/10 to-gray-900 pt-24 pb-16 px-4">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900/10 to-gray-900 pt-20 sm:pt-24 pb-16 px-4">
       <div className="max-w-3xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
@@ -270,8 +270,20 @@ export default function BestallningPage() {
               className="w-full bg-gradient-to-r from-mystical-gold to-yellow-500 text-gray-900 py-4 rounded-lg text-xl font-bold hover:from-yellow-500 hover:to-mystical-gold transition-all shadow-lg hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 disabled:transform-none"
               aria-label="Skicka beställning"
             >
-              {submitting ? 'Skickar...' : 'Beställ spådom'}
+              {submitting ? (
+                <span className="flex items-center justify-center gap-3">
+                  <div className="inline-block animate-spin rounded-full h-5 w-5 border-3 border-gray-900 border-t-transparent"></div>
+                  Skapar din spådom...
+                </span>
+              ) : (
+                'Beställ spådom'
+              )}
             </button>
+            {submitting && (
+              <p className="text-center text-gray-400 text-sm mt-3">
+                Detta kan ta några sekunder, vänta medan vi skapar din spådom...
+              </p>
+            )}
           </div>
         </form>
       </div>

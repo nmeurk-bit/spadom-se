@@ -120,7 +120,7 @@ export default function KontoPage() {
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 pt-24 pb-16">
+      <div className="max-w-7xl mx-auto px-4 pt-20 sm:pt-24 pb-16">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-mystical-purple"></div>
           <p className="mt-4 text-gray-600 dark:text-gray-400">Laddar ditt konto...</p>
@@ -130,7 +130,7 @@ export default function KontoPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 pt-24 pb-16">
+    <div className="max-w-7xl mx-auto px-4 pt-20 sm:pt-24 pb-16">
       <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-8">
         Mitt Konto
       </h1>
@@ -255,36 +255,76 @@ export default function KontoPage() {
         <h2 className="text-3xl font-bold text-mystical-gold mb-2">
           Köp Fler Spådomar
         </h2>
-        <p className="text-gray-300 mb-6">
+        <p className="text-gray-300 mb-8">
           Välj ett paket och få dina spådomar direkt.
         </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
           {[
-            { quantity: 1 as const, name: 'Köp 1 Spådom', price: '20 kr', desc: 'Perfekt för att testa' },
-            { quantity: 5 as const, name: 'Köp 5 Spådomar', price: '60 kr', desc: 'Bästa värdet' },
-            { quantity: 10 as const, name: 'Köp 10 Spådomar', price: '100 kr', desc: 'Mest populära' },
+            { quantity: 1 as const, name: '1 Spådom', price: '20 kr', desc: 'Perfekt för att testa', highlight: false },
+            { quantity: 5 as const, name: '5 Spådomar', price: '60 kr', desc: 'Bästa värdet', highlight: true },
+            { quantity: 10 as const, name: '10 Spådomar', price: '100 kr', desc: 'Mest populära', highlight: false },
           ].map((tier) => (
             <button
               key={tier.quantity}
               onClick={() => handlePurchase(tier.quantity)}
               disabled={purchaseLoading !== null}
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed text-left border-2 border-transparent hover:border-mystical-purple"
+              className={`group relative bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 rounded-2xl p-8 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden
+                ${tier.highlight
+                  ? 'border-2 border-mystical-gold shadow-[0_0_30px_rgba(218,165,32,0.3)] hover:shadow-[0_0_50px_rgba(218,165,32,0.5)] scale-105'
+                  : 'border-2 border-mystical-purple/30 shadow-[0_0_20px_rgba(138,43,226,0.2)] hover:shadow-[0_0_40px_rgba(138,43,226,0.4)]'
+                }
+                hover:-translate-y-2 disabled:hover:translate-y-0 disabled:hover:shadow-none active:scale-95 disabled:active:scale-100`}
             >
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
-                {tier.name}
-              </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
-                {tier.desc}
-              </p>
-              <p className="text-2xl font-bold text-mystical-purple">
-                {tier.price}
-              </p>
-              {purchaseLoading === tier.quantity && (
-                <div className="mt-3 text-sm text-gray-500 dark:text-gray-400">
-                  Omdirigerar till betalning...
+              {/* Mystisk bakgrundseffekt */}
+              <div className="absolute inset-0 bg-gradient-to-br from-mystical-gold/5 via-transparent to-mystical-purple/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+              {/* Badge för utmärkta paket */}
+              {tier.highlight && (
+                <div className="absolute top-4 right-4 bg-gradient-to-r from-mystical-gold to-yellow-500 text-gray-900 text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+                  ⭐ POPULÄRT
                 </div>
               )}
+
+              <div className="relative z-10 text-center">
+                {/* Rubrik */}
+                <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-mystical-gold transition-colors duration-300">
+                  {tier.name}
+                </h3>
+
+                {/* Underrubrik */}
+                <p className="text-sm text-gray-400 mb-6">
+                  {tier.desc}
+                </p>
+
+                {/* Pris med glöd */}
+                <div className="mb-6">
+                  <p className={`text-5xl font-extrabold bg-gradient-to-r ${
+                    tier.highlight
+                      ? 'from-mystical-gold via-yellow-400 to-mystical-gold'
+                      : 'from-mystical-purple via-purple-400 to-mystical-purple'
+                  } bg-clip-text text-transparent drop-shadow-[0_0_15px_rgba(218,165,32,0.5)]`}>
+                    {tier.price}
+                  </p>
+                </div>
+
+                {/* Loading state */}
+                {purchaseLoading === tier.quantity ? (
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-mystical-gold border-t-transparent"></div>
+                    <p className="text-sm text-mystical-gold font-semibold">
+                      Omdirigerar till betalning...
+                    </p>
+                  </div>
+                ) : (
+                  <div className="text-sm font-semibold text-gray-300 group-hover:text-white transition-colors duration-300">
+                    Klicka för att köpa →
+                  </div>
+                )}
+              </div>
+
+              {/* Glödande kant-effekt på hover */}
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-mystical-gold/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl"></div>
             </button>
           ))}
         </div>
