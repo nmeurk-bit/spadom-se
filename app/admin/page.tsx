@@ -246,12 +246,18 @@ export default function AdminPage() {
                         {formatAmount(order.amount)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <Link
-                          href={`/admin/kunder/${order.userId}`}
-                          className="text-mystical-purple hover:text-mystical-gold transition-colors"
-                        >
-                          Visa kund
-                        </Link>
+                        {order.userEmail !== 'Unknown' ? (
+                          <Link
+                            href={`/admin/kunder/${order.userId}`}
+                            className="text-mystical-purple hover:text-mystical-gold transition-colors"
+                          >
+                            Visa kund
+                          </Link>
+                        ) : (
+                          <span className="text-gray-400">
+                            Användare saknas
+                          </span>
+                        )}
                       </td>
                     </tr>
                   ))}
