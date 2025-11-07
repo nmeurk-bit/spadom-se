@@ -44,7 +44,9 @@ export interface Reading {
   question: string;
   category: 'love' | 'finance' | 'self_development' | 'spirituality' | 'future' | 'other';
   status: 'received' | 'processing' | 'completed';
+  response?: string; // Den genererade spådomen från AI
   createdAt: Timestamp;
+  completedAt?: Timestamp; // När spådomen genererades
 }
 
 // Hämta användare baserat på email

@@ -29,7 +29,9 @@ export interface AdminReading {
   question: string;
   category: 'love' | 'finance' | 'self_development' | 'spirituality' | 'future' | 'other';
   status: 'received' | 'processing' | 'completed';
+  response?: string; // Den genererade spådomen från AI
   createdAt: FirebaseFirestore.Timestamp;
+  completedAt?: FirebaseFirestore.Timestamp; // När spådomen genererades
 }
 
 export interface AdminLog {
@@ -425,5 +427,26 @@ export async function adminCreateReadingAtomic(
     }
     console.error('Error creating reading:', error);
     return { success: false, error: 'unknown_error' };
+  }
+}
+
+// Update reading with AI-generated response
+export async function adminUpdateReadingWithResponse(
+  readingId: string,
+  response: string
+): Promise<{ success: boolean; error?: string }> {
+  const db = getAdminFirestore();
+
+  try {
+    await db.collection('readings').doc(readingId).update({
+      response,
+      status: 'completed',
+      completedAt: FieldValue.serverTimestamp(),
+    });
+
+    return { success: true };
+  } catch (error: any) {
+    console.error('Error updating reading:', error);
+    return { success: false, error: error.message };
   }
 }
