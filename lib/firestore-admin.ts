@@ -97,7 +97,9 @@ export async function adminCreateOrder(orderData: Omit<AdminOrder, 'createdAt'>)
 export async function adminGetUserByEmail(email: string): Promise<{ id: string; email: string } | null> {
   const db = getAdminFirestore();
   const usersRef = db.collection('users');
-  const snapshot = await usersRef.where('email', '==', email).limit(1).get();
+  // Normalize email to lowercase for case-insensitive matching
+  const normalizedEmail = email.toLowerCase();
+  const snapshot = await usersRef.where('email', '==', normalizedEmail).limit(1).get();
 
   if (snapshot.empty) {
     return null;
@@ -122,8 +124,9 @@ export async function adminEnsureUserByEmail(email: string): Promise<string> {
   const db = getAdminFirestore();
   const userRef = db.collection('users').doc();
 
+  // Normalize email to lowercase
   await userRef.set({
-    email,
+    email: email.toLowerCase(),
     createdAt: FieldValue.serverTimestamp(),
   });
 
@@ -176,11 +179,13 @@ export async function adminGetAllUsers(
 // Search users by email
 export async function adminSearchUsersByEmail(searchTerm: string): Promise<Array<{ id: string; email: string; createdAt: FirebaseFirestore.Timestamp }>> {
   const db = getAdminFirestore();
+  // Normalize search term to lowercase for case-insensitive search
+  const normalizedSearchTerm = searchTerm.toLowerCase();
   // Firestore doesn't support full-text search, so we use range queries
   const snapshot = await db
     .collection('users')
-    .where('email', '>=', searchTerm)
-    .where('email', '<=', searchTerm + '\uf8ff')
+    .where('email', '>=', normalizedSearchTerm)
+    .where('email', '<=', normalizedSearchTerm + '\uf8ff')
     .limit(20)
     .get();
 

@@ -42,7 +42,25 @@ export default function LoginPage() {
 
       if (isSignUp) {
         // Skapa nytt konto
-        await createUserWithEmailAndPassword(auth, email, password);
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+
+        // Initiera användare i Firestore (skapa user document och wallet)
+        try {
+          const idToken = await userCredential.user.getIdToken();
+          const initResponse = await fetch('/api/auth/init-user', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ idToken }),
+          });
+
+          if (!initResponse.ok) {
+            console.error('Failed to initialize user in Firestore');
+            // Continue anyway - user is created in Firebase Auth
+          }
+        } catch (initError) {
+          console.error('Error initializing user:', initError);
+          // Continue anyway - user is created in Firebase Auth
+        }
       } else {
         // Logga in
         await signInWithEmailAndPassword(auth, email, password);
@@ -78,7 +96,22 @@ export default function LoginPage() {
     try {
       const auth = getFirebaseAuth();
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      const userCredential = await signInWithPopup(auth, provider);
+
+      // Initiera användare i Firestore om det är första gången
+      // (detta kommer inte skapa duplicat om användaren redan finns)
+      try {
+        const idToken = await userCredential.user.getIdToken();
+        await fetch('/api/auth/init-user', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idToken }),
+        });
+      } catch (initError) {
+        console.error('Error initializing user:', initError);
+        // Continue anyway
+      }
+
       router.push('/konto');
     } catch (err: any) {
       console.error('Google sign in error:', err);
