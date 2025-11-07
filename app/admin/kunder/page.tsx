@@ -24,7 +24,7 @@ function AdminKunderContent() {
   const [userToken, setUserToken] = useState<string>('');
 
   const handleViewCustomer = (userId: string) => {
-    console.log('Navigating to customer:', userId);
+    console.log('[ADMIN/LIST] Navigating to customer:', userId, 'URL:', `/admin/kunder/${userId}`);
     router.push(`/admin/kunder/${userId}`);
   };
 
@@ -251,12 +251,14 @@ function AdminKunderContent() {
                       {formatDate(user.createdAt)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <button
-                        onClick={() => handleViewCustomer(user.id)}
-                        className="text-mystical-purple hover:text-mystical-gold transition-colors font-medium cursor-pointer"
+                      <Link
+                        href={`/admin/kunder/${user.id}`}
+                        prefetch={false}
+                        onClick={() => console.log('[ADMIN/LIST] Link clicked for userId:', user.id)}
+                        className="text-mystical-purple hover:text-mystical-gold transition-colors font-medium"
                       >
                         Visa detaljer →
-                      </button>
+                      </Link>
                     </td>
                   </tr>
                 ))}
