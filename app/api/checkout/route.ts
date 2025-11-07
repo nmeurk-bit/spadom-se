@@ -27,8 +27,18 @@ export async function POST(request: NextRequest) {
     const priceId = getPriceIdForQuantity(quantity as 1 | 5 | 10);
 
     if (!priceId) {
+      console.error('Missing price ID for quantity:', quantity);
       return NextResponse.json(
         { error: 'Pris-ID saknas. Kontakta support.' },
+        { status: 500 }
+      );
+    }
+
+    // Kontrollera att NEXT_PUBLIC_BASE_URL är satt
+    if (!process.env.NEXT_PUBLIC_BASE_URL) {
+      console.error('NEXT_PUBLIC_BASE_URL is not set');
+      return NextResponse.json(
+        { error: 'Server-konfigurationsfel. Kontakta support.' },
         { status: 500 }
       );
     }

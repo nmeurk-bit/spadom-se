@@ -2,13 +2,13 @@
 export default function AterbetalningPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-16">
-      <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-8">
+      <h1 className="text-4xl font-bold text-white mb-8">
         Återbetalningspolicy
       </h1>
 
-      <div className="prose dark:prose-invert max-w-none space-y-6 text-gray-700 dark:text-gray-300">
+      <div className="prose prose-invert max-w-none space-y-6 text-gray-200">
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">1. Allmänt</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">1. Allmänt</h2>
           <p>
             Denna återbetalningspolicy beskriver villkoren för återbetalning av köp gjorda på Spådom.se. 
             Genom att köpa våra tjänster accepterar du denna policy.
@@ -16,7 +16,7 @@ export default function AterbetalningPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">2. Ångerrätt (14 dagar)</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">2. Ångerrätt (14 dagar)</h2>
           <p>
             Enligt distansavtalslagen har du som konsument 14 dagars ångerrätt från köpdatum. 
             <strong> Observera dock att ångerrätten upphör om du börjar använda tjänsten innan ångerfristen löpt ut.</strong>
@@ -29,7 +29,7 @@ export default function AterbetalningPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">3. Återbetalning vid oanvända krediter</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">3. Återbetalning vid oanvända krediter</h2>
           <p>
             Om du inte har använt någon av dina köpta spådomar och ångrar dig inom 14 dagar, 
             kan du begära full återbetalning. Kontakta oss på support@spadom.se med ditt köp-ID 
@@ -42,7 +42,7 @@ export default function AterbetalningPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">4. Ingen återbetalning vid delvis användning</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">4. Ingen återbetalning vid delvis användning</h2>
           <p>
             Om du har använt minst en spådom från ditt köpta paket, kan vi tyvärr inte erbjuda 
             återbetalning. Detta eftersom tjänsten är digital och har börjat levereras.
@@ -50,7 +50,7 @@ export default function AterbetalningPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">5. Återbetalning vid tekniska problem</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">5. Återbetalning vid tekniska problem</h2>
           <p>
             Om du upplever tekniska problem som förhindrar dig från att använda tjänsten, kontakta 
             oss omedelbart på support@spadom.se. Vi kommer att undersöka problemet och, om det är 
@@ -59,7 +59,7 @@ export default function AterbetalningPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">6. Kvalitetsgaranti</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">6. Kvalitetsgaranti</h2>
           <p>
             Vi strävar efter att leverera högkvalitativa AI-genererade spådomar. Om du är missnöjd 
             med kvaliteten på en spådom, kontakta oss inom 7 dagar efter leverans. Vi kan då:
@@ -75,7 +75,7 @@ export default function AterbetalningPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">7. Förlorade eller stulna krediter</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">7. Förlorade eller stulna krediter</h2>
           <p>
             Om ditt konto har äventyrats och krediter har använts utan ditt samtycke, kontakta oss 
             omedelbart på support@spadom.se. Vi kommer att undersöka situationen och vidta lämpliga 
@@ -89,7 +89,7 @@ export default function AterbetalningPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">8. Betalningstvister</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">8. Betalningstvister</h2>
           <p>
             Vid tvister om betalningar (t.ex. dubbeldebitering), kontakta oss först på 
             support@spadom.se. Om du inte är nöjd med vår hantering kan du kontakta:
@@ -101,7 +101,7 @@ export default function AterbetalningPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">9. Krediter förfaller inte</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">9. Krediter förfaller inte</h2>
           <p>
             Köpta krediter förfaller inte och kan användas när som helst. De kan dock inte:
           </p>
@@ -113,7 +113,7 @@ export default function AterbetalningPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">10. Hur du begär återbetalning</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">10. Hur du begär återbetalning</h2>
           <p>
             För att begära återbetalning:
           </p>
@@ -129,7 +129,7 @@ export default function AterbetalningPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">11. Kontakt</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">11. Kontakt</h2>
           <p>
             Vid frågor om vår återbetalningspolicy, kontakta oss på support@spadom.se
           </p>

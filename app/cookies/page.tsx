@@ -2,13 +2,13 @@
 export default function CookiesPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-16">
-      <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-8">
+      <h1 className="text-4xl font-bold text-white mb-8">
         Cookiepolicy
       </h1>
 
-      <div className="prose dark:prose-invert max-w-none space-y-6 text-gray-700 dark:text-gray-300">
+      <div className="prose prose-invert max-w-none space-y-6 text-gray-200">
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">1. Vad är cookies?</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">1. Vad är cookies?</h2>
           <p>
             Cookies är små textfiler som lagras på din enhet (dator, mobil, surfplatta) när du 
             besöker en webbplats. Cookies gör det möjligt för webbplatsen att komma ihåg dina 
@@ -17,7 +17,7 @@ export default function CookiesPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">2. Hur använder vi cookies?</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">2. Hur använder vi cookies?</h2>
           <p>
             På Spådom.se använder vi cookies för att:
           </p>
@@ -30,7 +30,7 @@ export default function CookiesPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">3. Typer av cookies</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">3. Typer av cookies</h2>
           
           <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3 mt-4">3.1 Nödvändiga cookies</h3>
           <p>
@@ -68,7 +68,7 @@ export default function CookiesPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">4. Tredjepartscookies</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">4. Tredjepartscookies</h2>
           <p>
             Vi använder följande tredjepartstjänster som kan sätta cookies:
           </p>
@@ -80,7 +80,7 @@ export default function CookiesPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">5. Hantera cookies</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">5. Hantera cookies</h2>
           <p>
             Du kan när som helst ändra dina cookieinställningar genom att:
           </p>
@@ -103,7 +103,7 @@ export default function CookiesPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">6. Livslängd för cookies</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">6. Livslängd för cookies</h2>
           <p>
             Våra cookies har olika livslängder:
           </p>
@@ -114,7 +114,7 @@ export default function CookiesPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">7. Uppdateringar av cookiepolicyn</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">7. Uppdateringar av cookiepolicyn</h2>
           <p>
             Vi kan uppdatera denna cookiepolicy från tid till annan för att återspegla ändringar i 
             vår användning av cookies eller av rättsliga skäl.
@@ -122,7 +122,7 @@ export default function CookiesPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">8. Kontakt</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">8. Kontakt</h2>
           <p>
             Vid frågor om vår användning av cookies, kontakta oss på support@spadom.se
           </p>
