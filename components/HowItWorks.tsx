@@ -67,7 +67,7 @@ export default function HowItWorks() {
               className="bg-gray-800/50 backdrop-blur-sm border border-mystical-purple/30 rounded-2xl p-8 hover:border-mystical-purple hover:mystical-glow transition-all duration-300"
             >
               {/* Ikon */}
-              <div className="w-20 h-20 bg-gradient-to-br from-mystical-purple to-purple-700 rounded-xl flex items-center justify-center mb-6 mystical-glow p-3">
+              <div className="w-20 h-20 bg-gradient-to-br from-gray-700 to-gray-900 rounded-xl flex items-center justify-center mb-6 border-2 border-mystical-gold/30 p-3">
                 <Image
                   src={step.iconSrc}
                   alt={step.iconAlt}
@@ -140,7 +140,7 @@ export default function HowItWorks() {
             <div>
               <h4 className="text-white font-semibold mb-2">Viktigt att veta</h4>
               <p className="text-blue-200 text-sm">
-                För underhållning och reflektion – inte medicinsk eller juridisk rådgivning.
+                För reflektion och personlig vägledning – inte medicinsk eller juridisk rådgivning.
               </p>
             </div>
           </div>

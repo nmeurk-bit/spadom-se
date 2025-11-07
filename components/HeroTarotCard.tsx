@@ -108,7 +108,7 @@ export default function HeroTarotCard() {
   };
 
   return (
-    <div className="perspective w-full max-w-sm mx-auto relative">
+    <div className="w-full max-w-sm mx-auto relative" style={{ perspective: '1200px' }}>
       {/* Hint för mobil */}
       {isMobile && showHint && !isFlipped && (
         <motion.div
@@ -123,18 +123,18 @@ export default function HeroTarotCard() {
       )}
 
       <motion.div
-        className="relative w-full h-[500px] cursor-pointer preserve-3d"
+        className="relative w-full h-[500px] preserve-3d"
         style={
           !isMobile && !prefersReducedMotion
-            ? { rotateX, rotateY }
-            : undefined
+            ? { rotateX, rotateY, cursor: isFlipped ? 'default' : 'pointer' }
+            : { cursor: isFlipped ? 'default' : 'pointer' }
         }
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
-        onClick={handleFlip}
-        onKeyDown={handleKeyDown}
-        role="button"
-        tabIndex={0}
+        onClick={!isFlipped ? handleFlip : undefined}
+        onKeyDown={!isFlipped ? handleKeyDown : undefined}
+        role={!isFlipped ? "button" : undefined}
+        tabIndex={!isFlipped ? 0 : undefined}
         aria-label={isFlipped ? 'Tarotkort vänt - visa CTA' : 'Tarotkort - klicka för att vända'}
         animate={{ rotateY: isFlipped ? 180 : 0 }}
         transition={
