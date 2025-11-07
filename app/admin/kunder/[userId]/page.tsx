@@ -32,13 +32,14 @@ interface UserDetails {
   }>;
 }
 
-export default function AdminKundDetaljPage({ params }: { params: { userId: string } }) {
+export default function AdminKundDetaljPage({ params }: { params: Promise<{ userId: string }> | { userId: string } }) {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [details, setDetails] = useState<UserDetails | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [userToken, setUserToken] = useState<string>('');
+  const [userId, setUserId] = useState<string>('');
 
   // Balance adjustment state
   const [adjusting, setAdjusting] = useState(false);
@@ -48,6 +49,16 @@ export default function AdminKundDetaljPage({ params }: { params: { userId: stri
   const [showAdjustForm, setShowAdjustForm] = useState(false);
 
   useEffect(() => {
+    const initParams = async () => {
+      const resolvedParams = await Promise.resolve(params);
+      setUserId(resolvedParams.userId);
+    };
+    initParams();
+  }, [params]);
+
+  useEffect(() => {
+    if (!userId) return;
+
     const unsubscribe = onAuthStateChanged(getFirebaseAuth(), async (user) => {
       if (!user) {
         router.push('/login');
@@ -82,11 +93,13 @@ export default function AdminKundDetaljPage({ params }: { params: { userId: stri
     });
 
     return () => unsubscribe();
-  }, [router, params.userId]);
+  }, [router, userId]);
 
   const loadUserDetails = async (token: string) => {
+    if (!userId) return;
+
     try {
-      const response = await fetch(`/api/admin/users/${params.userId}`, {
+      const response = await fetch(`/api/admin/users/${userId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -115,7 +128,7 @@ export default function AdminKundDetaljPage({ params }: { params: { userId: stri
           Authorization: `Bearer ${userToken}`,
         },
         body: JSON.stringify({
-          userId: params.userId,
+          userId: userId,
           action: adjustAction,
           amount: adjustAmount,
           note: adjustNote,
@@ -154,7 +167,7 @@ export default function AdminKundDetaljPage({ params }: { params: { userId: stri
           Authorization: `Bearer ${userToken}`,
         },
         body: JSON.stringify({
-          userId: params.userId,
+          userId: userId,
           action,
           amount,
           note: `Snabbjustering: ${action === 'add' ? '+' : '-'}${amount}`,
