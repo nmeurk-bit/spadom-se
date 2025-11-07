@@ -130,15 +130,21 @@ export async function createReadingAtomic(
   readingData: Omit<Reading, 'userId' | 'status' | 'createdAt'>
 ): Promise<{ success: boolean; readingId?: string; error?: string }> {
   try {
+    console.log('createReadingAtomic: Starting for userId:', userId);
+    console.log('createReadingAtomic: Reading data:', readingData);
+
     const result = await runTransaction(getDb(), async (transaction) => {
       const walletRef = doc(getDb(), 'wallets', userId);
       const walletSnap = await transaction.get(walletRef);
+
+      console.log('createReadingAtomic: Wallet exists?', walletSnap.exists());
 
       if (!walletSnap.exists()) {
         throw new Error('Wallet not found');
       }
 
       const wallet = walletSnap.data() as Wallet;
+      console.log('createReadingAtomic: Current balance:', wallet.balance);
 
       if (wallet.balance < 1) {
         throw new Error('Insufficient balance');
@@ -146,14 +152,19 @@ export async function createReadingAtomic(
 
       // Skapa reading
       const readingRef = doc(collection(getDb(), 'readings'));
-      transaction.set(readingRef, {
+      const readingToCreate = {
         userId,
         ...readingData,
-        status: 'received',
+        status: 'received' as const,
         createdAt: Timestamp.now(),
-      });
+      };
+
+      console.log('createReadingAtomic: Creating reading with data:', readingToCreate);
+
+      transaction.set(readingRef, readingToCreate);
 
       // Dra 1 kredit
+      console.log('createReadingAtomic: Decrementing balance by 1');
       transaction.update(walletRef, {
         balance: increment(-1),
         updatedAt: Timestamp.now(),
@@ -162,13 +173,19 @@ export async function createReadingAtomic(
       return readingRef.id;
     });
 
+    console.log('createReadingAtomic: SUCCESS! Reading ID:', result);
     return { success: true, readingId: result };
   } catch (error: any) {
+    console.error('createReadingAtomic: FAILED with error:', error);
+    console.error('createReadingAtomic: Error code:', error.code);
+    console.error('createReadingAtomic: Error message:', error.message);
+
     if (error.message === 'Insufficient balance') {
       return { success: false, error: 'insufficient_balance' };
     }
-    console.error('Error creating reading:', error);
-    return { success: false, error: 'unknown_error' };
+
+    // Return the actual error for debugging
+    return { success: false, error: error.code || error.message || 'unknown_error' };
   }
 }
 
