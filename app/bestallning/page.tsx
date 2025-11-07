@@ -28,7 +28,6 @@ export default function BestallningPage() {
   const [personName, setPersonName] = useState('');
   const [question, setQuestion] = useState('');
   const [category, setCategory] = useState<Category>('other');
-  const [birthdate, setBirthdate] = useState('');
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(getFirebaseAuth(), (user) => {
@@ -77,7 +76,6 @@ export default function BestallningPage() {
           personName: personName.trim(),
           question: question.trim(),
           category,
-          birthdate: birthdate || undefined,
         }),
       });
 
@@ -226,24 +224,6 @@ export default function BestallningPage() {
                 Formulera dig öppet men tydligt. Be gärna om vägledning istället för ja/nej.
               </p>
             </div>
-          </div>
-
-          {/* Födelsedatum (valfritt) */}
-          <div>
-            <label htmlFor="birthdate" className="block text-sm font-semibold text-gray-300 mb-3">
-              Födelsedatum (valfritt)
-            </label>
-            <input
-              type="date"
-              id="birthdate"
-              value={birthdate}
-              onChange={(e) => setBirthdate(e.target.value)}
-              className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg focus:ring-2 focus:ring-mystical-purple focus:border-mystical-purple text-white"
-              aria-label="Födelsedatum"
-            />
-            <p className="text-sm text-gray-400 mt-2">
-              Vissa spådomar kan bli mer personliga med födelsedatum.
-            </p>
           </div>
 
           {/* Infobox */}

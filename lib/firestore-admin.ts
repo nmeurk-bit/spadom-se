@@ -28,7 +28,6 @@ export interface AdminReading {
   personName: string;
   question: string;
   category: 'love' | 'finance' | 'self_development' | 'spirituality' | 'future' | 'other';
-  birthdate?: string;
   status: 'received' | 'processing' | 'completed';
   createdAt: FirebaseFirestore.Timestamp;
 }

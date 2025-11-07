@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
     // Hämta userId från request body istället för att verifiera token server-side
     // Frontend ska skicka userId efter att ha verifierat användaren där
     const body = await request.json();
-    const { userId, personName, question, category, birthdate } = body;
+    const { userId, personName, question, category } = body;
 
     // Validera userId
     if (!userId) {
@@ -47,7 +47,6 @@ export async function POST(request: NextRequest) {
       personName: personName.trim(),
       question: question.trim(),
       category,
-      birthdate: birthdate || undefined,
     });
 
     if (!result.success) {

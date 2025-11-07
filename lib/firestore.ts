@@ -43,7 +43,6 @@ export interface Reading {
   personName: string;
   question: string;
   category: 'love' | 'finance' | 'self_development' | 'spirituality' | 'future' | 'other';
-  birthdate?: string;
   status: 'received' | 'processing' | 'completed';
   createdAt: Timestamp;
 }
@@ -153,14 +152,9 @@ export async function createReadingAtomic(
       // Skapa reading
       const readingRef = doc(collection(getDb(), 'readings'));
 
-      // Ta bort undefined-värden från readingData (Firestore tillåter inte undefined)
-      const cleanedReadingData = Object.fromEntries(
-        Object.entries(readingData).filter(([_, value]) => value !== undefined)
-      );
-
       const readingToCreate = {
         userId,
-        ...cleanedReadingData,
+        ...readingData,
         status: 'received' as const,
         createdAt: Timestamp.now(),
       };
