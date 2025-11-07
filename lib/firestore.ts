@@ -152,9 +152,15 @@ export async function createReadingAtomic(
 
       // Skapa reading
       const readingRef = doc(collection(getDb(), 'readings'));
+
+      // Ta bort undefined-värden från readingData (Firestore tillåter inte undefined)
+      const cleanedReadingData = Object.fromEntries(
+        Object.entries(readingData).filter(([_, value]) => value !== undefined)
+      );
+
       const readingToCreate = {
         userId,
-        ...readingData,
+        ...cleanedReadingData,
         status: 'received' as const,
         createdAt: Timestamp.now(),
       };
