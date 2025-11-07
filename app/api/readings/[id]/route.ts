@@ -1,6 +1,6 @@
 // app/api/readings/[id]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { getFirebaseAdminAuth, getFirebaseAdminFirestore } from '@/lib/firebase-admin';
+import { getAdminAuth, getAdminFirestore } from '@/lib/firebase-admin';
 
 export async function DELETE(
   request: NextRequest,
@@ -14,7 +14,7 @@ export async function DELETE(
     }
 
     const token = authHeader.split('Bearer ')[1];
-    const decodedToken = await getFirebaseAdminAuth().verifyIdToken(token);
+    const decodedToken = await getAdminAuth().verifyIdToken(token);
     const userId = decodedToken.uid;
 
     if (!userId) {
@@ -22,7 +22,7 @@ export async function DELETE(
     }
 
     const readingId = params.id;
-    const db = getFirebaseAdminFirestore();
+    const db = getAdminFirestore();
 
     // Hämta reading för att verifiera ägande
     const readingRef = db.collection('readings').doc(readingId);

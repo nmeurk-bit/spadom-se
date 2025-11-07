@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import HeroTarotCard from './HeroTarotCard';
 
 export default function NewHero() {
@@ -26,25 +25,8 @@ export default function NewHero() {
       {/* Innehåll */}
       <div className="relative z-10 max-w-7xl mx-auto w-full">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          {/* Vänster sida - Logga & Text */}
+          {/* Vänster sida - Text */}
           <div className="text-center lg:text-left space-y-8">
-            {/* Logga */}
-            <div className="flex justify-center lg:justify-start">
-              <div className="relative inline-block">
-                <div className="absolute inset-0 blur-xl bg-mystical-purple/30 rounded-full" />
-                <div className="relative bg-[#0a0a14] p-6 rounded-2xl mystical-glow">
-                  <Image
-                    src="/logo-spadommen.png"
-                    alt="Spådommen.se"
-                    width={300}
-                    height={100}
-                    className="w-auto h-24 object-contain"
-                    priority
-                  />
-                </div>
-              </div>
-            </div>
-
             {/* Tagline */}
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white text-glow mb-6">
               <span className="text-mystical-gold text-glow-gold">

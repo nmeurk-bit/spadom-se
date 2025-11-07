@@ -14,13 +14,13 @@ import CookieBanner from '@/components/CookieBanner';
 // });
 
 export const metadata: Metadata = {
-  title: 'Spådom.se - AI-driven andlig vägledning',
-  description: 'Köp AI-genererade spådomar för underhållning och reflektion. Få svar på dina frågor om kärlek, karriär, ekonomi och mer.',
-  keywords: ['spådom', 'tarot', 'AI', 'andlighet', 'vägledning', 'framtid'],
+  title: 'Spådom.se - Personliga spådomar när du behöver vägledning',
+  description: 'Få personliga spådomar för reflektion och vägledning. Utforska frågor om kärlek, ekonomi, självutveckling och din framtid.',
+  keywords: ['spådom', 'tarot', 'personlig vägledning', 'andlighet', 'kärlek', 'ekonomi', 'framtid', 'självutveckling'],
   authors: [{ name: 'Spådom.se' }],
   openGraph: {
-    title: 'Spådom.se - AI-driven andlig vägledning',
-    description: 'Köp AI-genererade spådomar för underhållning och reflektion.',
+    title: 'Spådom.se - Personliga spådomar när du behöver vägledning',
+    description: 'Få personliga spådomar för reflektion och vägledning. Utforska frågor om kärlek, ekonomi, självutveckling och din framtid.',
     url: 'https://spadom.se',
     siteName: 'Spådom.se',
     locale: 'sv_SE',
