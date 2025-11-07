@@ -272,7 +272,7 @@ export default function BestallningPage() {
             >
               {submitting ? (
                 <span className="flex items-center justify-center gap-3">
-                  <div className="inline-block animate-spin rounded-full h-5 w-5 border-3 border-gray-900 border-t-transparent"></div>
+                  <div className="inline-block animate-spin rounded-full h-6 w-6 border-4 border-gray-900 border-t-transparent"></div>
                   Skapar din spådom...
                 </span>
               ) : (
@@ -280,9 +280,15 @@ export default function BestallningPage() {
               )}
             </button>
             {submitting && (
-              <p className="text-center text-gray-400 text-sm mt-3">
-                Detta kan ta några sekunder, vänta medan vi skapar din spådom...
-              </p>
+              <div className="mt-4 flex flex-col items-center gap-2">
+                <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-mystical-gold border-t-transparent"></div>
+                <p className="text-center text-mystical-gold text-base font-semibold">
+                  Skapar din spådom...
+                </p>
+                <p className="text-center text-gray-400 text-sm">
+                  Detta kan ta några sekunder, vänligen vänta
+                </p>
+              </div>
             )}
           </div>
         </form>

@@ -2,6 +2,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { getFirebaseAuth } from '@/lib/firebase';
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
@@ -51,9 +52,16 @@ export default function Header() {
     <header className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-b from-gray-900/95 via-gray-900/90 to-transparent backdrop-blur-sm">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
         <div className="flex justify-between items-center">
-          {/* Logo/Brand - visible on mobile */}
-          <Link href="/" className="text-mystical-gold font-bold text-lg sm:text-xl">
-            Spådom
+          {/* Logo - visible on all devices */}
+          <Link href="/" className="flex items-center">
+            <Image
+              src="/logo-spadommen.png"
+              alt="Spådommen Logo"
+              width={120}
+              height={40}
+              className="h-8 sm:h-10 w-auto"
+              priority
+            />
           </Link>
 
           {/* Desktop Menu */}
