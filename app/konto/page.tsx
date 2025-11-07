@@ -173,79 +173,86 @@ export default function KontoPage() {
         <h2 className="text-3xl font-bold text-mystical-gold mb-2">
           Mina Spådomar
         </h2>
-        <p className="text-gray-300 mb-6">
+        <p className="text-gray-300 mb-8">
           Klicka på en tidigare spådom för att öppna och läsa den.
         </p>
 
         {readings.length === 0 ? (
-          <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-8 text-center">
-            <p className="text-gray-600 dark:text-gray-400 text-lg mb-4">
+          <div className="bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 rounded-2xl p-12 text-center border-2 border-mystical-purple/30 shadow-[0_0_20px_rgba(138,43,226,0.2)]">
+            <div className="mb-4">
+              <svg className="w-16 h-16 mx-auto text-mystical-gold opacity-50" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+            </div>
+            <p className="text-gray-300 text-lg mb-2">
               Du har inga spådomar ännu.
             </p>
-            <p className="text-gray-500 dark:text-gray-500 text-sm">
-              Köp ett paket nedan för att börja.
+            <p className="text-gray-500 text-sm">
+              Köp ett paket nedan för att börja din mystiska resa.
             </p>
           </div>
         ) : (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
-            <table className="w-full">
-              <thead className="bg-gray-50 dark:bg-gray-700">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Datum
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Person
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Kategori
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Fråga
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Status
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                {readings.map((reading) => (
-                  <tr
-                    key={reading.id}
-                    onClick={() => setSelectedReading(reading)}
-                    className="hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {readings.map((reading) => (
+              <div
+                key={reading.id}
+                onClick={() => setSelectedReading(reading)}
+                className="group relative bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 rounded-xl p-6 cursor-pointer transition-all duration-300 border-2 border-mystical-purple/30 hover:border-mystical-gold/50 shadow-[0_0_15px_rgba(138,43,226,0.15)] hover:shadow-[0_0_30px_rgba(218,165,32,0.3)] hover:-translate-y-1 overflow-hidden"
+              >
+                {/* Mystisk bakgrundseffekt */}
+                <div className="absolute inset-0 bg-gradient-to-br from-mystical-gold/5 via-transparent to-mystical-purple/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+                <div className="relative z-10">
+                  {/* Datum & Status */}
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-xs text-gray-400">
                       {formatDate(reading.createdAt)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      {reading.personName || '-'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                    </span>
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        reading.status === 'completed'
+                          ? 'bg-green-900/30 text-green-400 border border-green-500/30'
+                          : reading.status === 'processing'
+                          ? 'bg-yellow-900/30 text-yellow-400 border border-yellow-500/30'
+                          : 'bg-gray-800 text-gray-400 border border-gray-600/30'
+                      }`}
+                    >
+                      {getStatusLabel(reading.status)}
+                    </span>
+                  </div>
+
+                  {/* Kategori */}
+                  <div className="mb-3">
+                    <span className="text-mystical-gold text-lg font-semibold">
                       {getCategoryLabel(reading.category)}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">
-                      {reading.question.length > 40
-                        ? reading.question.substring(0, 40) + '...'
-                        : reading.question}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          reading.status === 'completed'
-                            ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
-                            : reading.status === 'processing'
-                            ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
-                            : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
-                        }`}
-                      >
-                        {getStatusLabel(reading.status)}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    </span>
+                  </div>
+
+                  {/* Person */}
+                  {reading.personName && (
+                    <div className="mb-2">
+                      <span className="text-sm text-gray-400">För: </span>
+                      <span className="text-white font-medium">{reading.personName}</span>
+                    </div>
+                  )}
+
+                  {/* Fråga */}
+                  <div className="mt-3 pt-3 border-t border-gray-700/50">
+                    <p className="text-sm text-gray-300 line-clamp-2">
+                      {reading.question}
+                    </p>
+                  </div>
+
+                  {/* Hover-indikator */}
+                  <div className="mt-4 flex items-center justify-end text-xs text-mystical-gold opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    Klicka för att läsa →
+                  </div>
+                </div>
+
+                {/* Glödande kant-effekt */}
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-mystical-gold/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl"></div>
+              </div>
+            ))}
           </div>
         )}
       </section>
