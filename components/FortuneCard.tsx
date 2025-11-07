@@ -31,7 +31,7 @@ export default function FortuneCard({ fortune, personName, category }: FortuneCa
   const categoryLabel = categoryLabels[category as keyof typeof categoryLabels] || '🌙 Spådom';
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-gray-900 via-purple-900/20 to-gray-900">
+    <div className="min-h-screen flex items-center justify-center p-4 pt-24 bg-gradient-to-b from-gray-900 via-purple-900/20 to-gray-900">
       <div className="w-full max-w-[380px]">
         {/* Spådomskort med 3D flip - Tarot-proportioner 3:5 */}
         <div
