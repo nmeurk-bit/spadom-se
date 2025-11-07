@@ -15,10 +15,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // För 5 och 10 spådomar, kräv userId (användaren måste vara inloggad i frontend)
-    if (quantity !== 1 && !userId) {
+    // Alla paket kräver userId (användaren måste vara inloggad i frontend)
+    if (!userId) {
       return NextResponse.json(
-        { error: 'Du måste vara inloggad för att köpa detta paket.' },
+        { error: 'Du måste vara inloggad för att köpa spådomar.' },
         { status: 401 }
       );
     }
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
       cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/`,
       metadata: {
         quantity: quantity.toString(),
-        userId: userId || 'guest', // Skicka userId om tillgängligt
+        userId: userId, // userId krävs nu för alla paket
       },
     });
 

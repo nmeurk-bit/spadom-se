@@ -63,7 +63,7 @@ export default function Footer() {
               Kontakt
             </h3>
             <p className="text-sm text-gray-400">
-              support@spadom.se
+              spadommensverige@gmail.com
             </p>
           </div>
         </div>

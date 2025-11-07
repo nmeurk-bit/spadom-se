@@ -7,10 +7,6 @@ export default function CookiesPage() {
       </h1>
 
       <div className="prose dark:prose-invert max-w-none space-y-6 text-gray-700 dark:text-gray-300">
-        <p className="text-sm text-red-600 dark:text-red-400 font-semibold">
-          Obs: Detta är en malltext och utgör inte juridisk rådgivning. Anpassa efter din verksamhet och konsultera en jurist.
-        </p>
-
         <section>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">1. Vad är cookies?</h2>
           <p>
