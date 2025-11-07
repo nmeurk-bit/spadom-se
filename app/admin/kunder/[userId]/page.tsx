@@ -61,6 +61,7 @@ export default function AdminKundDetaljPage({ params }: { params: Promise<{ user
 
     const unsubscribe = onAuthStateChanged(getFirebaseAuth(), async (user) => {
       if (!user) {
+        console.log('No user, redirecting to login');
         router.push('/login');
         return;
       }
@@ -75,7 +76,10 @@ export default function AdminKundDetaljPage({ params }: { params: Promise<{ user
         });
         const checkData = await checkResponse.json();
 
+        console.log('Is admin:', checkData.isAdmin);
+
         if (!checkData.isAdmin) {
+          console.log('Not admin, redirecting to konto');
           router.push('/konto');
           return;
         }
@@ -83,6 +87,7 @@ export default function AdminKundDetaljPage({ params }: { params: Promise<{ user
         setIsAdmin(true);
 
         // Load user details
+        console.log('Loading user details for userId:', userId);
         await loadUserDetails(token);
       } catch (err: any) {
         setError('Kunde inte ladda kunddata');
