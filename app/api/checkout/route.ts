@@ -43,6 +43,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // URL-encode base URL för att hantera svenska tecken som "å" i spådommen.se
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+    const successUrl = encodeURI(`${baseUrl}/tack?typ=betalning`);
+    const cancelUrl = encodeURI(`${baseUrl}/`);
+
     // Skapa Stripe Checkout session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -55,8 +60,8 @@ export async function POST(request: NextRequest) {
       mode: 'payment',
       customer_email: undefined, // Stripe kommer att fråga efter e-post
       billing_address_collection: 'required',
-      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/tack?typ=betalning`,
-      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/`,
+      success_url: successUrl,
+      cancel_url: cancelUrl,
       metadata: {
         quantity: quantity.toString(),
         userId: userId, // userId krävs nu för alla paket
