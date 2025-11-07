@@ -2,13 +2,19 @@
 import AdminKundDetaljClient from './AdminKundDetaljClient';
 
 interface PageProps {
-  params: Promise<{
+  params: {
     userId: string;
-  }>;
+  };
 }
 
-export default async function AdminKundDetaljPage({ params }: PageProps) {
-  const { userId } = await params;
+export default function AdminKundDetaljPage({ params }: PageProps) {
+  console.log('[SERVER] AdminKundDetaljPage rendering with params:', params);
+  const { userId } = params;
+
+  if (!userId) {
+    console.error('[SERVER] No userId in params!');
+    return <div>Error: No userId provided</div>;
+  }
 
   return <AdminKundDetaljClient userId={userId} />;
 }
