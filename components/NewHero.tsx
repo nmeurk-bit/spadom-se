@@ -47,10 +47,11 @@ export default function NewHero() {
 
             {/* Tagline */}
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white text-glow mb-6">
-              Andlig vägledning –<br />
               <span className="text-mystical-gold text-glow-gold">
-                för underhållning och reflektion
+                Personliga spådomar
               </span>
+              <br />
+              när du behöver vägledning
             </h1>
 
             {/* CTA-knappar */}
@@ -72,7 +73,7 @@ export default function NewHero() {
 
             {/* Info-text */}
             <p className="text-gray-400 text-sm max-w-md mx-auto lg:mx-0">
-              För underhållning och reflektion – inte medicinsk eller juridisk rådgivning.
+              För reflektion och personlig vägledning – inte medicinsk eller juridisk rådgivning.
             </p>
           </div>
 

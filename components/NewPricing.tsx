@@ -43,8 +43,8 @@ export default function NewPricing() {
     try {
       const user = getFirebaseAuth().currentUser;
 
-      if (quantity !== 1 && !user) {
-        setError('Du måste vara inloggad för att köpa detta paket.');
+      if (!user) {
+        setError('Du måste vara inloggad för att köpa spådomar.');
         setLoading(null);
         window.location.href = '/login';
         return;
@@ -177,7 +177,7 @@ export default function NewPricing() {
                     />
                   </svg>
                   <span className="text-gray-300 text-sm">
-                    AI-genererade personliga spådomar
+                    Personliga spådomar skapade för dig
                   </span>
                 </li>
                 <li className="flex items-start gap-3">
@@ -213,9 +213,7 @@ export default function NewPricing() {
                     />
                   </svg>
                   <span className="text-gray-300 text-sm">
-                    {tier.quantity === 1
-                      ? 'Ingen inloggning krävs'
-                      : 'Sparas i ditt konto för evigt'}
+                    Sparas i ditt konto
                   </span>
                 </li>
                 <li className="flex items-start gap-3">

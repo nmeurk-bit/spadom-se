@@ -86,16 +86,20 @@ export default function BestallningPage() {
       if (!response.ok) {
         if (data.error === 'insufficient_balance') {
           setError('Du har inga spådomar kvar. Gå till ditt konto för att köpa fler.');
+          setSubmitting(false);
           return;
         }
-        throw new Error(data.error || 'Något gick fel');
+        // Visa det specifika felmeddelandet från servern
+        setError(data.error || 'Kunde inte skapa beställning. Försök igen.');
+        setSubmitting(false);
+        return;
       }
 
       // Framgång! Redirecta till tacksida
       router.push('/tack?typ=bestallning');
     } catch (err: any) {
-      setError(err.message);
-    } finally {
+      console.error('Beställningsfel:', err);
+      setError('Kunde inte skapa beställning. Försök igen.');
       setSubmitting(false);
     }
   };
@@ -116,11 +120,11 @@ export default function BestallningPage() {
       <div className="max-w-3xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-white text-glow mb-4">
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
             Beställ en spådom
           </h1>
-          <p className="text-xl text-gray-400">
-            Fyll i formuläret nedan för att få din personliga AI-genererade spådom
+          <p className="text-xl text-gray-300">
+            Fyll i formuläret nedan för att få din personliga spådom
           </p>
         </div>
 
@@ -250,7 +254,6 @@ export default function BestallningPage() {
               </svg>
               <p className="text-blue-200 text-sm">
                 Din beställning behandlas inom 24 timmar och du får svar i ditt konto.
-                För underhållning och reflektion – inte medicinsk eller juridisk rådgivning.
               </p>
             </div>
           </div>

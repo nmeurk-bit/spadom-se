@@ -2,17 +2,13 @@
 export default function VillkorPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-16">
-      <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-8">
+      <h1 className="text-4xl font-bold text-white mb-8">
         Användarvillkor
       </h1>
 
-      <div className="prose dark:prose-invert max-w-none space-y-6 text-gray-700 dark:text-gray-300">
-        <p className="text-sm text-red-600 dark:text-red-400 font-semibold">
-          Obs: Detta är en malltext och utgör inte juridisk rådgivning. Anpassa efter din verksamhet och konsultera en jurist.
-        </p>
-
+      <div className="prose prose-invert max-w-none space-y-6 text-gray-200">
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">1. Allmänt</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">1. Allmänt</h2>
           <p>
             Dessa användarvillkor ("Villkoren") reglerar din användning av Spådom.se ("Tjänsten"), 
             som drivs av [Företagsnamn] ("vi", "oss", "vår"). Genom att använda Tjänsten accepterar 

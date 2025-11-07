@@ -15,10 +15,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // För 5 och 10 spådomar, kräv userId (användaren måste vara inloggad i frontend)
-    if (quantity !== 1 && !userId) {
+    // Alla paket kräver userId (användaren måste vara inloggad i frontend)
+    if (!userId) {
       return NextResponse.json(
-        { error: 'Du måste vara inloggad för att köpa detta paket.' },
+        { error: 'Du måste vara inloggad för att köpa spådomar.' },
         { status: 401 }
       );
     }
@@ -27,11 +27,26 @@ export async function POST(request: NextRequest) {
     const priceId = getPriceIdForQuantity(quantity as 1 | 5 | 10);
 
     if (!priceId) {
+      console.error('Missing price ID for quantity:', quantity);
       return NextResponse.json(
         { error: 'Pris-ID saknas. Kontakta support.' },
         { status: 500 }
       );
     }
+
+    // Kontrollera att NEXT_PUBLIC_BASE_URL är satt
+    if (!process.env.NEXT_PUBLIC_BASE_URL) {
+      console.error('NEXT_PUBLIC_BASE_URL is not set');
+      return NextResponse.json(
+        { error: 'Server-konfigurationsfel. Kontakta support.' },
+        { status: 500 }
+      );
+    }
+
+    // URL-encode base URL för att hantera svenska tecken som "å" i spådommen.se
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+    const successUrl = encodeURI(`${baseUrl}/tack?typ=betalning`);
+    const cancelUrl = encodeURI(`${baseUrl}/`);
 
     // Skapa Stripe Checkout session
     const session = await stripe.checkout.sessions.create({
@@ -45,11 +60,11 @@ export async function POST(request: NextRequest) {
       mode: 'payment',
       customer_email: undefined, // Stripe kommer att fråga efter e-post
       billing_address_collection: 'required',
-      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/tack?typ=betalning`,
-      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/`,
+      success_url: successUrl,
+      cancel_url: cancelUrl,
       metadata: {
         quantity: quantity.toString(),
-        userId: userId || 'guest', // Skicka userId om tillgängligt
+        userId: userId, // userId krävs nu för alla paket
       },
     });
 

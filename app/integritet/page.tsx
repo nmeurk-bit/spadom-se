@@ -2,18 +2,13 @@
 export default function IntegritetPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-16">
-      <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-8">
+      <h1 className="text-4xl font-bold text-white mb-8">
         Integritetspolicy
       </h1>
 
-      <div className="prose dark:prose-invert max-w-none space-y-6 text-gray-700 dark:text-gray-300">
-        <p className="text-sm text-red-600 dark:text-red-400 font-semibold">
-          Obs: Detta är en malltext och utgör inte juridisk rådgivning. Anpassa efter din verksamhet och konsultera en jurist. 
-          Säkerställ att policyn följer GDPR och andra dataskyddslagar.
-        </p>
-
+      <div className="prose prose-invert max-w-none space-y-6 text-gray-200">
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">1. Inledning</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">1. Inledning</h2>
           <p>
             Denna integritetspolicy beskriver hur Spådom.se ("vi", "oss", "vår") samlar in, använder 
             och skyddar dina personuppgifter när du använder vår tjänst.
@@ -25,7 +20,7 @@ export default function IntegritetPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">2. Personuppgiftsansvarig</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">2. Personuppgiftsansvarig</h2>
           <p>
             Personuppgiftsansvarig för behandlingen av dina personuppgifter är:
           </p>
@@ -38,7 +33,7 @@ export default function IntegritetPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">3. Vilka uppgifter samlar vi in?</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">3. Vilka uppgifter samlar vi in?</h2>
           <p>
             Vi samlar in följande typer av personuppgifter:
           </p>
@@ -51,7 +46,7 @@ export default function IntegritetPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">4. Hur använder vi dina uppgifter?</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">4. Hur använder vi dina uppgifter?</h2>
           <p>
             Vi använder dina personuppgifter för att:
           </p>
@@ -67,7 +62,7 @@ export default function IntegritetPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">5. Rättslig grund för behandling</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">5. Rättslig grund för behandling</h2>
           <p>
             Vi behandlar dina personuppgifter baserat på:
           </p>
@@ -80,7 +75,7 @@ export default function IntegritetPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">6. Delning av uppgifter</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">6. Delning av uppgifter</h2>
           <p>
             Vi delar dina personuppgifter med:
           </p>
@@ -95,7 +90,7 @@ export default function IntegritetPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">7. Datalagring</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">7. Datalagring</h2>
           <p>
             Vi lagrar dina personuppgifter så länge du har ett aktivt konto hos oss. Efter att du 
             raderat ditt konto raderas dina uppgifter inom 30 dagar, förutom vad som krävs för att 
@@ -104,7 +99,7 @@ export default function IntegritetPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">8. Dina rättigheter</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">8. Dina rättigheter</h2>
           <p>
             Enligt GDPR har du rätt att:
           </p>
@@ -124,7 +119,7 @@ export default function IntegritetPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">9. Säkerhet</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">9. Säkerhet</h2>
           <p>
             Vi vidtar lämpliga tekniska och organisatoriska åtgärder för att skydda dina 
             personuppgifter mot obehörig åtkomst, förlust, missbruk eller ändring. Detta inkluderar 
@@ -133,7 +128,7 @@ export default function IntegritetPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">10. Cookies</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">10. Cookies</h2>
           <p>
             Vi använder cookies för att förbättra din upplevelse. Se vår{' '}
             <a href="/cookies" className="text-mystical-purple hover:underline">
@@ -144,7 +139,7 @@ export default function IntegritetPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">11. Ändringar av policyn</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">11. Ändringar av policyn</h2>
           <p>
             Vi kan uppdatera denna integritetspolicy från tid till annan. Väsentliga ändringar kommer 
             att meddelas via e-post eller på webbplatsen.
@@ -152,7 +147,7 @@ export default function IntegritetPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">12. Kontakt</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">12. Kontakt</h2>
           <p>
             Vid frågor om denna integritetspolicy eller hur vi behandlar dina personuppgifter, 
             kontakta oss på support@spadom.se

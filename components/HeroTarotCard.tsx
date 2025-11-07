@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, useMotionValue, useTransform } from 'framer-motion';
 import { getFirebaseAuth } from '@/lib/firebase';
+import Image from 'next/image';
 
 export default function HeroTarotCard() {
   const [isFlipped, setIsFlipped] = useState(false);
@@ -10,6 +11,9 @@ export default function HeroTarotCard() {
   const [isMobile, setIsMobile] = useState(false);
   const [loading, setLoading] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+  // Använd ref för att permanent låsa flip-state
+  const hasFlipped = useRef(false);
 
   // Motion values för 3D tilt-effekt (endast desktop)
   const x = useMotionValue(0);
@@ -47,7 +51,7 @@ export default function HeroTarotCard() {
   }, []);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (isMobile || prefersReducedMotion) return;
+    if (isMobile || prefersReducedMotion || hasFlipped.current) return;
 
     const rect = e.currentTarget.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
@@ -58,14 +62,17 @@ export default function HeroTarotCard() {
   };
 
   const handleMouseLeave = () => {
-    if (isMobile || prefersReducedMotion) return;
+    if (isMobile || prefersReducedMotion || hasFlipped.current) return;
     x.set(0);
     y.set(0);
   };
 
   const handleFlip = () => {
-    setIsFlipped(!isFlipped);
-    setShowHint(false);
+    if (!hasFlipped.current) {
+      hasFlipped.current = true;
+      setIsFlipped(true);
+      setShowHint(false);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -80,12 +87,17 @@ export default function HeroTarotCard() {
     try {
       const user = getFirebaseAuth().currentUser;
 
+      if (!user) {
+        window.location.href = '/login';
+        return;
+      }
+
       const response = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           quantity: 1,
-          userId: user?.uid || null,
+          userId: user.uid,
         }),
       });
 
@@ -107,9 +119,9 @@ export default function HeroTarotCard() {
   };
 
   return (
-    <div className="perspective w-full max-w-sm mx-auto relative">
+    <div className="w-full max-w-sm mx-auto relative" style={{ perspective: '1200px' }}>
       {/* Hint för mobil */}
-      {isMobile && showHint && !isFlipped && (
+      {isMobile && showHint && !hasFlipped.current && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -122,20 +134,28 @@ export default function HeroTarotCard() {
       )}
 
       <motion.div
-        className="relative w-full h-[500px] cursor-pointer preserve-3d"
+        className="relative w-full h-[500px]"
         style={
-          !isMobile && !prefersReducedMotion
-            ? { rotateX, rotateY }
-            : undefined
+          !isMobile && !prefersReducedMotion && !hasFlipped.current
+            ? {
+                transformStyle: 'preserve-3d',
+                rotateX,
+                rotateY,
+                cursor: 'pointer'
+              }
+            : {
+                transformStyle: 'preserve-3d',
+                cursor: hasFlipped.current ? 'default' : 'pointer'
+              }
         }
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
-        onClick={handleFlip}
-        onKeyDown={handleKeyDown}
-        role="button"
-        tabIndex={0}
-        aria-label={isFlipped ? 'Tarotkort vänt - visa CTA' : 'Tarotkort - klicka för att vända'}
-        animate={{ rotateY: isFlipped ? 180 : 0 }}
+        onClick={!hasFlipped.current ? handleFlip : undefined}
+        onKeyDown={!hasFlipped.current ? handleKeyDown : undefined}
+        role={!hasFlipped.current ? "button" : undefined}
+        tabIndex={!hasFlipped.current ? 0 : undefined}
+        aria-label={hasFlipped.current ? 'Tarotkort vänt - visa CTA' : 'Tarotkort - klicka för att vända'}
+        animate={{ rotateY: hasFlipped.current ? 180 : 0 }}
         transition={
           prefersReducedMotion
             ? { duration: 0 }
@@ -145,33 +165,14 @@ export default function HeroTarotCard() {
         {/* Framsida (baksidan av tarotkortet) */}
         <div
           className="absolute inset-0 backface-hidden rounded-2xl overflow-hidden mystical-glow"
-          style={{
-            background: 'linear-gradient(135deg, #1a0b2e 0%, #2d1b4e 50%, #1a0b2e 100%)',
-          }}
         >
-          <div className="w-full h-full p-8 flex items-center justify-center relative">
-            {/* Dekorativt mönster */}
-            <div className="absolute inset-0 opacity-20">
-              <div className="w-full h-full" style={{
-                backgroundImage: `
-                  radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.1) 1px, transparent 1px),
-                  radial-gradient(circle at 25% 25%, rgba(107, 70, 193, 0.1) 1px, transparent 1px)
-                `,
-                backgroundSize: '50px 50px, 30px 30px',
-              }}></div>
-            </div>
-
-            {/* Centralt symbol/design */}
-            <div className="relative z-10">
-              <div className="w-40 h-40 border-4 border-mystical-gold rounded-full flex items-center justify-center mystical-glow-gold">
-                <div className="w-32 h-32 border-2 border-mystical-purple rounded-full flex items-center justify-center">
-                  <svg className="w-24 h-24 text-mystical-gold" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </div>
+          <Image
+            src="/tarot-back.png"
+            alt="Baksidan av tarotkort"
+            fill
+            className="object-cover"
+            priority
+          />
         </div>
 
         {/* Baksida (CTA-innehåll) */}
