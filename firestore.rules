@@ -90,16 +90,14 @@ service cloud.firestore {
       allow create: if isSignedIn()
                     && request.resource.data.userId == request.auth.uid
                     && request.resource.data.keys().hasAll(['userId', 'personName', 'question', 'category', 'status', 'createdAt'])
-                    && request.resource.data.size() >= 6  // Minst 6 fält (required)
-                    && request.resource.data.size() <= 7  // Max 7 fält (inkl. optional birthdate)
+                    && request.resource.data.size() == 6  // Exakt 6 fält
                     && request.resource.data.personName is string
                     && request.resource.data.personName.size() >= 2
                     && request.resource.data.question is string
                     && request.resource.data.question.size() >= 10
                     && request.resource.data.category in ['love', 'finance', 'self_development', 'spirituality', 'future', 'other']
                     && request.resource.data.status == 'received'
-                    && request.resource.data.createdAt is timestamp
-                    && (!('birthdate' in request.resource.data) || request.resource.data.birthdate is string);
+                    && request.resource.data.createdAt is timestamp;
 
       // Cloud Functions kan uppdatera status
       // Klienter kan inte uppdatera
