@@ -65,8 +65,10 @@ export default function HeroTarotCard() {
   };
 
   const handleFlip = () => {
-    setIsFlipped(!isFlipped);
-    setShowHint(false);
+    if (!isFlipped) {
+      setIsFlipped(true);
+      setShowHint(false);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -123,11 +125,19 @@ export default function HeroTarotCard() {
       )}
 
       <motion.div
-        className="relative w-full h-[500px] preserve-3d"
+        className="relative w-full h-[500px]"
         style={
           !isMobile && !prefersReducedMotion
-            ? { rotateX, rotateY, cursor: isFlipped ? 'default' : 'pointer' }
-            : { cursor: isFlipped ? 'default' : 'pointer' }
+            ? {
+                transformStyle: 'preserve-3d',
+                rotateX,
+                rotateY,
+                cursor: isFlipped ? 'default' : 'pointer'
+              }
+            : {
+                transformStyle: 'preserve-3d',
+                cursor: isFlipped ? 'default' : 'pointer'
+              }
         }
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
