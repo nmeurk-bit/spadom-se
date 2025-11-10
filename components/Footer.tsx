@@ -72,7 +72,7 @@ export default function Footer() {
         <div className="mt-8 pt-8 border-t border-gray-700">
           <p className="text-xs text-gray-400 text-center max-w-4xl mx-auto">
             <strong>Viktigt:</strong> Spådomar erbjuds för reflektion och personlig vägledning.
-            Innehållet utgör inte medicinsk, juridisk eller finansiell rådgivning. Åldersgräns 18 år.
+            Innehållet utgör inte medicinsk, juridisk eller finansiell rådgivning.
           </p>
           <p className="text-xs text-gray-400 text-center mt-4">
             © {new Date().getFullYear()} Spådom.se. Alla rättigheter förbehållna.

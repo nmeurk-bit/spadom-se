@@ -19,22 +19,14 @@ export default function VillkorPage() {
         <section>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">2. Tjänstebeskrivning</h2>
           <p>
-            Spådom.se erbjuder AI-genererade spådomar för underhållning och reflektion. Våra spådomar 
-            är inte avsedda som medicinsk, juridisk, finansiell eller professionell rådgivning. 
+            Spådom.se erbjuder AI-genererade spådomar för underhållning och reflektion. Våra spådomar
+            är inte avsedda som medicinsk, juridisk, finansiell eller professionell rådgivning.
             Innehållet är genererat av artificiell intelligens och ska betraktas som underhållning.
           </p>
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">3. Åldersgräns</h2>
-          <p>
-            Du måste vara minst 18 år för att använda Tjänsten. Genom att använda Tjänsten bekräftar 
-            du att du är minst 18 år gammal.
-          </p>
-        </section>
-
-        <section>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">4. Köp och betalning</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">3. Köp och betalning</h2>
           <p>
             Betalningar sker via Stripe, en tredjepartstjänst för säkra betalningar. Vi lagrar inte 
             dina kortuppgifter. Alla priser anges i svenska kronor (SEK) och inkluderar moms där det 
@@ -48,7 +40,7 @@ export default function VillkorPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">5. Användaransvar</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">4. Användaransvar</h2>
           <p>
             Du ansvarar för att:
           </p>
@@ -61,7 +53,7 @@ export default function VillkorPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">6. Immateriella rättigheter</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">5. Immateriella rättigheter</h2>
           <p>
             Allt innehåll på Spådom.se, inklusive men inte begränsat till text, grafik, logotyper och 
             kod, ägs av oss eller våra licensgivare och är skyddat av upphovsrättslagar.
@@ -69,7 +61,7 @@ export default function VillkorPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">7. Ansvarsbegränsning</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">6. Ansvarsbegränsning</h2>
           <p>
             Tjänsten tillhandahålls "som den är" utan några garantier. Vi ansvarar inte för:
           </p>
@@ -82,7 +74,7 @@ export default function VillkorPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">8. Ändring av villkor</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">7. Ändring av villkor</h2>
           <p>
             Vi förbehåller oss rätten att ändra dessa Villkor när som helst. Ändringar träder i kraft 
             omedelbart vid publicering på webbplatsen. Din fortsatta användning av Tjänsten efter 
@@ -91,7 +83,7 @@ export default function VillkorPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">9. Tillämplig lag</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">8. Tillämplig lag</h2>
           <p>
             Dessa Villkor ska tolkas och tillämpas i enlighet med svensk lag. Eventuella tvister ska 
             lösas i svensk domstol.
@@ -99,7 +91,7 @@ export default function VillkorPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">10. Kontakt</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">9. Kontakt</h2>
           <p>
             Vid frågor om dessa Villkor, kontakta oss på support@spadom.se
           </p>
