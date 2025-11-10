@@ -3,6 +3,7 @@
 
 import { useState } from 'react';
 import { getFirebaseAuth } from '@/lib/firebase';
+import { trackInitiateCheckout } from '@/lib/metaPixel';
 
 const PRICING_TIERS = [
   {
@@ -49,6 +50,18 @@ export default function NewPricing() {
         window.location.href = '/login';
         return;
       }
+
+      // Hitta rätt pris från PRICING_TIERS
+      const tier = PRICING_TIERS.find((t) => t.quantity === quantity);
+      const price = tier?.price || 0;
+
+      // Track InitiateCheckout event INNAN användaren lämnar sidan
+      trackInitiateCheckout({
+        value: price,
+        currency: 'SEK',
+        num_items: quantity,
+        content_ids: [`spadom_${quantity}`],
+      });
 
       const response = await fetch('/api/checkout', {
         method: 'POST',

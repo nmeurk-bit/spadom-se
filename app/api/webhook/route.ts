@@ -1,6 +1,7 @@
 // filepath: app/api/webhook/route.ts
 import { NextResponse } from 'next/server';
 import { adminIncWallet, adminCreateOrder, adminEnsureUserByEmail } from '@/lib/firestore-admin';
+import { sendMetaPurchaseEvent } from '@/lib/metaConversionAPI';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -113,6 +114,20 @@ export async function POST(req: Request) {
       await adminIncWallet(userId, quantity);
 
       console.log('Wallet updated. Added', quantity, 'prophecies to user', userId);
+
+      // Skicka Purchase event till Meta Conversion API
+      // Detta görs asynkront så att webhook kan svara snabbt till Stripe
+      sendMetaPurchaseEvent({
+        email: customerEmail,
+        value: session.amount_total || 0, // Belopp i öre från Stripe
+        currency: 'SEK',
+        numItems: quantity,
+        orderId,
+        eventSourceUrl: 'https://spadom.se',
+      }).catch((err) => {
+        console.error('Fel vid skickning av Meta Purchase event:', err);
+        // Vi loggar bara felet, kastar inte vidare
+      });
 
       return NextResponse.json({
         received: true,
